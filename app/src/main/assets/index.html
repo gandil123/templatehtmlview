@@ -1,88 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Catatan Simpel</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قنديل الزمان - البنك المحلي</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            color: #333;
-        }
+    <div id="app">
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
+        <!-- ====== صفحة تسجيل الدخول ====== -->
+        <div id="loginPage" class="page active">
+            <div class="auth-container">
+                <h1>🏦 قنديل الزمان</h1>
+                <h2>تسجيل الدخول</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>اسم المستخدم</label>
+                        <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+                    </div>
+                    <button type="submit" class="btn btn-gold">دخول</button>
+                </form>
+                <p class="link-text">ليس لديك حساب؟ <a href="#" onclick="showRegister()">أنشئ حساباً الآن</a></p>
+                <p class="link-text" style="font-size:12px; opacity:0.5; margin-top:15px;">👑 حساب الأدمن: admin / admin123</p>
+            </div>
+        </div>
 
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
+        <!-- ====== صفحة التسجيل ====== -->
+        <div id="registerPage" class="page">
+            <div class="auth-container">
+                <h1>🏦 قنديل الزمان</h1>
+                <h2>إنشاء حساب جديد</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="regFullName" placeholder="الاسم ثلاثي" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المستخدم</label>
+                        <input type="text" id="regUsername" placeholder="اختر اسماً" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="regPassword" placeholder="6 أحرف على الأقل" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>تأكيد كلمة المرور</label>
+                        <input type="password" id="regConfirmPassword" placeholder="أعد كتابة كلمة المرور" required>
+                    </div>
+                    <button type="submit" class="btn btn-gold">تسجيل</button>
+                </form>
+                <p class="link-text">لديك حساب؟ <a href="#" onclick="showLogin()">سجّل الدخول</a></p>
+            </div>
+        </div>
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+        <!-- ====== لوحة التحكم (الصفحة الرئيسية) ====== -->
+        <div id="dashboardPage" class="page">
+            <!-- البطاقة البنكية -->
+            <div class="bank-card" id="bankCard">
+                <div class="card-header">
+                    <span class="brand">✦ قنديل الزمان</span>
+                    <div class="chip"></div>
+                </div>
+                <div class="card-balance">
+                    <div class="label">الرصيد المتاح</div>
+                    <div class="amount" id="balanceDisplay">0.00 SDG</div>
+                </div>
+                <div class="card-number-row">
+                    <span class="number" id="accountNumberDisplay">SA-0000-0000-0000</span>
+                    <button class="copy-btn" onclick="copyAccountNumber()">📋 نسخ</button>
+                </div>
+                <div class="card-footer">
+                    <span>رقم الحساب</span>
+                    <span>💳 بنكي</span>
+                </div>
+            </div>
 
-        .feature-list {
-            list-style: none;
-            margin-bottom: 30px;
-            text-align: left;
-        }
+            <!-- أزرار الإجراءات -->
+            <div class="actions-grid">
+                <div class="action-btn primary" onclick="openTransfer()">
+                    <span class="icon">💸</span>
+                    تحويل
+                </div>
+                <div class="action-btn" onclick="openHistory()">
+                    <span class="icon">📋</span>
+                    المعاملات
+                </div>
+                <div class="action-btn" onclick="showNotification('سيتم تفعيل الاشتراك قريباً', 'info')">
+                    <span class="icon">📦</span>
+                    تفعيل باقة
+                </div>
+                <div class="action-btn" onclick="showNotification('شحن المحفظة متاح قريباً', 'info')">
+                    <span class="icon">💰</span>
+                    شحن المحفظة
+                </div>
+            </div>
 
-        .feature-list li {
-            padding: 12px 15px;
-            margin: 8px 0;
-            background: #f8f9ff;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+            <!-- زر لوحة الأدمن (يظهر فقط للأدمن) -->
+            <div id="adminPanelBtn" style="display:none; margin-top:10px;">
+                <button class="btn btn-danger" onclick="openAdminPanel()">👑 لوحة التحكم - الأدمن</button>
+            </div>
 
-        .feature-list li::before {
-            content: "✓";
-            color: #667eea;
-            font-weight: bold;
-            font-size: 18px;
-        }
+            <!-- زر تسجيل الخروج -->
+            <button class="btn btn-secondary" onclick="logout()" style="margin-top:10px;">🚪 تسجيل خروج</button>
+        </div>
 
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
+        <!-- ====== مودال التحويل ====== -->
+        <div id="transferModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>💸 تحويل مبلغ</h2>
+                    <button class="modal-close" onclick="closeModal('transferModal')">✕</button>
+                </div>
+                <form id="transferForm">
+                    <div class="form-group">
+                        <label>رقم حساب المستلم</label>
+                        <input type="text" id="transferToAccount" placeholder="أدخل رقم الحساب" required>
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ (SDG)</label>
+                        <input type="number" id="transferAmount" placeholder="0.00" required min="0.01" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات (اختياري)</label>
+                        <input type="text" id="transferNote" placeholder="سبب التحويل">
+                    </div>
+                    <button type="submit" class="btn btn-gold">تنفيذ التحويل</button>
+                </form>
+            </div>
+        </div>
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        <!-- ====== مودال المعاملات ====== -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content" style="max-width:500px;">
+                <div class="modal-header">
+                    <h2>📋 سجل المعاملات</h2>
+                    <button class="modal-close" onclick="closeModal('historyModal')">✕</button>
+                </div>
+                <div id="historyList">
+                    <!-- تُملأ بالجافاسكريبت -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== مودال لوحة الأدمن ====== -->
+        <div id="adminModal" class="modal">
+            <div class="modal-content" style="max-width:600px;">
+                <div class="modal-header">
+                    <h2>👑 لوحة تحكم الأدمن</h2>
+                    <button class="modal-close" onclick="closeModal('adminModal')">✕</button>
+                </div>
+                <div id="adminContent">
+                    <!-- تُملأ بالجافاسكريبت -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== إشعار "منبق" لعدم كفاية الرصيد ====== -->
+        <div id="insufficientNotification" class="insufficient-notification">
+            <div class="emoji">😤</div>
+            <div class="title">منبق!</div>
+            <div class="subtitle">عفواً، رصيدك غير كافٍ لإتمام هذه العملية</div>
+            <div class="amount-details">
+                <div><span>الرصيد المتاح:</span><span id="insufficientBalance">0.00 SDG</span></div>
+                <div><span>المبلغ المطلوب:</span><span id="insufficientRequired">0.00 SDG</span></div>
+                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:5px; margin-top:5px;">
+                    <span style="color:#e74c3c;">العجز:</span>
+                    <span style="color:#e74c3c;" id="insufficientShortfall">0.00 SDG</span>
+                </div>
+            </div>
+            <button class="btn-close-insufficient" onclick="closeInsufficientNotification()">حسناً، فهمت</button>
+        </div>
+
+        <!-- ====== إشعار التحويل ====== -->
+        <div id="transferNotification" class="notification-toast">
+            <div class="message" id="notifMessage">✅ تم التحويل بنجاح</div>
+            <div class="sub" id="notifSub">المبلغ: 0.00 SDG إلى حساب: ...</div>
+            <div class="btn-group">
+                <button class="btn btn-gold" onclick="downloadReceipt()">📥 تنزيل الإيصال (صورة)</button>
+                <button class="btn btn-secondary" onclick="closeNotification()">إغلاق</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
         }
 
         .btn:active {
