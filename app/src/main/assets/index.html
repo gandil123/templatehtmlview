@@ -2,20 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قنديل الزمان - البنك المحلي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>قنديل بنك - الخدمات المصرفية المتكاملة </title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="app">
 
-        <!-- ====== صفحة تسجيل الدخول ====== -->
+        <!-- ========== صفحة تسجيل الدخول ========== -->
         <div id="loginPage" class="page active">
-            <div class="auth-container">
-                <h1>🏦 قنديل الزمان</h1>
-                <h2>تسجيل الدخول</h2>
-                <form id="loginForm">
+            <div class="login-container">
+                <div class="logo">🏦 بنك الياد</div>
+                <div class="sub-logo">خدمات مصرفية متكاملة • آمنة • ذكية</div>
+                <form id="loginForm" style="width:100%;">
                     <div class="form-group">
                         <label>اسم المستخدم</label>
                         <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم" required>
@@ -24,19 +24,23 @@
                         <label>كلمة المرور</label>
                         <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
                     </div>
-                    <button type="submit" class="btn btn-gold">دخول</button>
+                    <button type="submit" class="btn-login">دخول</button>
                 </form>
-                <p class="link-text">ليس لديك حساب؟ <a href="#" onclick="showRegister()">أنشئ حساباً الآن</a></p>
-                <p class="link-text" style="font-size:12px; opacity:0.5; margin-top:15px;">👑 حساب الأدمن: admin / admin123</p>
+                <div class="register-link">
+                    ليس لديك حساب؟ <a href="#" onclick="showRegister()">إنشاء حساب جديد</a>
+                </div>
+                <div style="margin-top:15px; font-size:11px; opacity:0.3; color:white;">
+                    👑 admin / admin123
+                </div>
             </div>
         </div>
 
-        <!-- ====== صفحة التسجيل ====== -->
+        <!-- ========== صفحة التسجيل ========== -->
         <div id="registerPage" class="page">
-            <div class="auth-container">
-                <h1>🏦 قنديل الزمان</h1>
-                <h2>إنشاء حساب جديد</h2>
-                <form id="registerForm">
+            <div class="login-container">
+                <div class="logo" style="font-size:36px;">🏦 بنك الياد</div>
+                <div class="sub-logo">إنشاء حساب جديد</div>
+                <form id="registerForm" style="width:100%;">
                     <div class="form-group">
                         <label>الاسم الكامل</label>
                         <input type="text" id="regFullName" placeholder="الاسم ثلاثي" required>
@@ -50,126 +54,331 @@
                         <input type="password" id="regPassword" placeholder="6 أحرف على الأقل" required minlength="6">
                     </div>
                     <div class="form-group">
+                        <label>نوع الحساب</label>
+                        <select id="regAccountType">
+                            <option value="جاري">جاري</option>
+                            <option value="ادخار">ادخار</option>
+                            <option value="مرتب">مرتب</option>
+                            <option value="أعمال">أعمال</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>العملة الأساسية</label>
+                        <select id="regCurrency">
+                            <option value="SDG">جنيه سوداني (SDG)</option>
+                            <option value="USD">دولار أمريكي (USD)</option>
+                            <option value="EUR">يورو (EUR)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>تأكيد كلمة المرور</label>
                         <input type="password" id="regConfirmPassword" placeholder="أعد كتابة كلمة المرور" required>
                     </div>
-                    <button type="submit" class="btn btn-gold">تسجيل</button>
+                    <button type="submit" class="btn-login">تسجيل</button>
                 </form>
-                <p class="link-text">لديك حساب؟ <a href="#" onclick="showLogin()">سجّل الدخول</a></p>
+                <div class="register-link">
+                    لديك حساب؟ <a href="#" onclick="showLogin()">تسجيل الدخول</a>
+                </div>
             </div>
         </div>
 
-        <!-- ====== لوحة التحكم (الصفحة الرئيسية) ====== -->
+        <!-- ========== الصفحة الرئيسية ========== -->
         <div id="dashboardPage" class="page">
-            <!-- البطاقة البنكية -->
-            <div class="bank-card" id="bankCard">
-                <div class="card-header">
-                    <span class="brand">✦ قنديل الزمان</span>
-                    <div class="chip"></div>
+            <div class="header">
+                <div class="user-info">
+                    <div class="greeting">أهلاً</div>
+                    <div class="name" id="userNameDisplay">خالد</div>
+                    <div style="font-size:11px; opacity:0.4;" id="userTypeDisplay">جاري</div>
                 </div>
-                <div class="card-balance">
-                    <div class="label">الرصيد المتاح</div>
-                    <div class="amount" id="balanceDisplay">0.00 SDG</div>
-                </div>
-                <div class="card-number-row">
-                    <span class="number" id="accountNumberDisplay">SA-0000-0000-0000</span>
-                    <button class="copy-btn" onclick="copyAccountNumber()">📋 نسخ</button>
-                </div>
-                <div class="card-footer">
-                    <span>رقم الحساب</span>
-                    <span>💳 بنكي</span>
+                <button class="notif-btn" onclick="toggleNotifications()">🔔 <span id="notifCount" style="font-size:10px; background:#e74c3c; padding:2px 6px; border-radius:50%; position:absolute; margin-top:-8px;">0</span></button>
+            </div>
+
+            <div class="total-balance">
+                <div class="label">إجمالي الرصيد</div>
+                <div class="amount" id="totalBalanceDisplay">0.00 <span class="currency">SDG</span></div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn-small" onclick="quickDeposit()">💰 إيداع</button>
+                    <button class="btn-small" onclick="quickWithdraw()">🏧 سحب</button>
                 </div>
             </div>
 
-            <!-- أزرار الإجراءات -->
-            <div class="actions-grid">
-                <div class="action-btn primary" onclick="openTransfer()">
-                    <span class="icon">💸</span>
-                    تحويل
-                </div>
-                <div class="action-btn" onclick="openHistory()">
-                    <span class="icon">📋</span>
-                    المعاملات
-                </div>
-                <div class="action-btn" onclick="showNotification('سيتم تفعيل الاشتراك قريباً', 'info')">
-                    <span class="icon">📦</span>
-                    تفعيل باقة
-                </div>
-                <div class="action-btn" onclick="showNotification('شحن المحفظة متاح قريباً', 'info')">
-                    <span class="icon">💰</span>
-                    شحن المحفظة
+            <!-- البطاقة الثلاثية الأبعاد -->
+            <div id="cardContainer" class="card-3d-container" style="display:none;" onclick="triggerFlyingMoney(event)">
+                <div class="card-3d" id="card3d">
+                    <div class="card-face">
+                        <div class="card-row">
+                            <span class="card-brand">✦ بنك الياد</span>
+                            <div class="chip"></div>
+                        </div>
+                        <div class="card-number" id="cardNumberDisplay">5246 7812 3456 7890</div>
+                        <div class="card-row">
+                            <div>
+                                <div style="font-size:10px; opacity:0.5;">حامل البطاقة</div>
+                                <div class="card-name" id="cardHolderName">خالد أسد</div>
+                            </div>
+                            <div>
+                                <div style="font-size:10px; opacity:0.5;">صالح حتى</div>
+                                <div class="card-expiry" id="cardExpiry">06/25</div>
+                            </div>
+                        </div>
+                        <div style="position:absolute; bottom:10px; left:20px; font-size:10px; opacity:0.3;">💳 للسحب الفوري</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- زر لوحة الأدمن (يظهر فقط للأدمن) -->
-            <div id="adminPanelBtn" style="display:none; margin-top:10px;">
-                <button class="btn btn-danger" onclick="openAdminPanel()">👑 لوحة التحكم - الأدمن</button>
+            <!-- القائمة السريعة -->
+            <div class="quick-actions">
+                <button class="quick-btn primary" onclick="openTransfer()">💸 تحويل</button>
+                <button class="quick-btn" onclick="openBills()">📄 فواتير</button>
+                <button class="quick-btn" onclick="openCards()">💳 بطاقات</button>
+                <button class="quick-btn" onclick="openInternational()">🌍 حوالات</button>
             </div>
 
-            <!-- زر تسجيل الخروج -->
-            <button class="btn btn-secondary" onclick="logout()" style="margin-top:10px;">🚪 تسجيل خروج</button>
+            <!-- إحصائيات سريعة -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">عدد المعاملات</span>
+                    <span class="stat-value" id="txCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">أكبر إيداع</span>
+                    <span class="stat-value" id="maxDeposit">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">أكبر سحب</span>
+                    <span class="stat-value" id="maxWithdraw">0</span>
+                </div>
+            </div>
+
+            <!-- سجل المعاملات -->
+            <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; margin:10px 0;">
+                <div style="display:flex; justify-content:space-between; color:rgba(255,255,255,0.5); font-size:13px; padding:5px 0;">
+                    <span>آخر المعاملات</span>
+                    <span style="cursor:pointer;" onclick="showAllHistory()">عرض الكل</span>
+                </div>
+                <div id="recentHistory" class="history-list" style="flex:1; overflow-y:auto;"></div>
+            </div>
+
+            <!-- القائمة السفلية -->
+            <div class="bottom-nav">
+                <button class="nav-item active" onclick="showDashboard()">🏠 الرئيسية</button>
+                <button class="nav-item" onclick="showOffers()">🎯 العروض</button>
+                <button class="nav-item" onclick="showBalance()">💰 المبلغ</button>
+                <button class="nav-item" onclick="showMorePage()">📋 المزيد</button>
+            </div>
         </div>
 
-        <!-- ====== مودال التحويل ====== -->
-        <div id="transferModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>💸 تحويل مبلغ</h2>
-                    <button class="modal-close" onclick="closeModal('transferModal')">✕</button>
+        <!-- ========== صفحة المزيد ========== -->
+        <div id="morePage" class="page">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+                <h2 style="color:white; font-size:20px;">📋 الخدمات</h2>
+                <button class="back-btn" onclick="showDashboard()" style="padding:8px 20px; width:auto;">✕</button>
+            </div>
+            <div class="more-grid">
+                <div class="more-item" onclick="openBills()">
+                    <span class="icon">📄</span>
+                    <span class="label">فواتير الخدمات</span>
                 </div>
+                <div class="more-item" onclick="openCards()">
+                    <span class="icon">💳</span>
+                    <span class="label">إدارة البطاقات</span>
+                </div>
+                <div class="more-item" onclick="openInternational()">
+                    <span class="icon">🌍</span>
+                    <span class="label">الحوالات الدولية</span>
+                </div>
+                <div class="more-item" onclick="openPayments()">
+                    <span class="icon">📋</span>
+                    <span class="label">خدمات القبول</span>
+                </div>
+                <div class="more-item" onclick="openSupport()">
+                    <span class="icon">👤</span>
+                    <span class="label">خدمة العملاء</span>
+                </div>
+                <div class="more-item" onclick="openBranches()">
+                    <span class="icon">📍</span>
+                    <span class="label">الموقع والفروع</span>
+                </div>
+                <div class="more-item" onclick="openSubsidies()">
+                    <span class="icon">💵</span>
+                    <span class="label">إعانات الصرف</span>
+                </div>
+                <div class="more-item" onclick="openAdminPanel()" style="border-color:rgba(240,192,64,0.3);">
+                    <span class="icon">👑</span>
+                    <span class="label" style="color:#f0c040;">لوحة الإدارة</span>
+                </div>
+                <div class="more-item" onclick="logout()" style="border-color:rgba(231,76,60,0.3);">
+                    <span class="icon">🚪</span>
+                    <span class="label" style="color:#e74c3c;">تسجيل الخروج</span>
+                </div>
+            </div>
+            <div class="bottom-nav" style="margin-top:auto;">
+                <button class="nav-item" onclick="showDashboard()">🏠 الرئيسية</button>
+                <button class="nav-item" onclick="showOffers()">🎯 العروض</button>
+                <button class="nav-item" onclick="showBalance()">💰 المبلغ</button>
+                <button class="nav-item active">📋 المزيد</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال التحويل ========== -->
+        <div id="transferModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>💸 تحويل أموال</h2>
                 <form id="transferForm">
                     <div class="form-group">
                         <label>رقم حساب المستلم</label>
-                        <input type="text" id="transferToAccount" placeholder="أدخل رقم الحساب" required>
+                        <input type="text" id="transferToAccount" placeholder="مثال: SA123456789012" required>
                     </div>
                     <div class="form-group">
-                        <label>المبلغ (SDG)</label>
+                        <label>المبلغ</label>
                         <input type="number" id="transferAmount" placeholder="0.00" required min="0.01" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>ملاحظات (اختياري)</label>
+                        <label>الملاحظات</label>
                         <input type="text" id="transferNote" placeholder="سبب التحويل">
                     </div>
-                    <button type="submit" class="btn btn-gold">تنفيذ التحويل</button>
+                    <button type="submit" class="btn-modal">تنفيذ التحويل</button>
+                    <button type="button" class="btn-close-modal" onclick="closeModal('transferModal')">إلغاء</button>
                 </form>
             </div>
         </div>
 
-        <!-- ====== مودال المعاملات ====== -->
-        <div id="historyModal" class="modal">
+        <!-- ========== مودال فواتير الخدمات ========== -->
+        <div id="billsModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>📄 دفع الفواتير</h2>
+                <div class="bills-grid">
+                    <button class="bill-btn" onclick="payBill('كهرباء')">⚡ كهرباء</button>
+                    <button class="bill-btn" onclick="payBill('ماء')">💧 ماء</button>
+                    <button class="bill-btn" onclick="payBill('إنترنت')">🌐 إنترنت</button>
+                    <button class="bill-btn" onclick="payBill('جوال')">📱 جوال</button>
+                    <button class="bill-btn" onclick="payBill('غاز')">🔥 غاز</button>
+                    <button class="bill-btn" onclick="payBill('تلفزيون')">📺 تلفزيون</button>
+                </div>
+                <button class="btn-close-modal" onclick="closeModal('billsModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال البطاقات ========== -->
+        <div id="cardsModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>💳 إدارة البطاقات</h2>
+                <div id="cardsList" class="cards-list"></div>
+                <button class="btn-modal" onclick="addNewCard()" style="margin-top:10px;">➕ إضافة بطاقة جديدة</button>
+                <button class="btn-close-modal" onclick="closeModal('cardsModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال الحوالات الدولية ========== -->
+        <div id="internationalModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>🌍 حوالات دولية</h2>
+                <div class="exchange-rates" id="exchangeRates"></div>
+                <form id="internationalForm">
+                    <div class="form-group">
+                        <label>العملة المرسلة</label>
+                        <select id="sendCurrency">
+                            <option value="SDG">جنيه سوداني (SDG)</option>
+                            <option value="USD">دولار (USD)</option>
+                            <option value="EUR">يورو (EUR)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>العملة المستقبلة</label>
+                        <select id="receiveCurrency">
+                            <option value="USD">دولار (USD)</option>
+                            <option value="EUR">يورو (EUR)</option>
+                            <option value="SDG">جنيه سوداني (SDG)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ</label>
+                        <input type="number" id="internationalAmount" placeholder="0.00" required min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>رقم حساب المستلم الدولي</label>
+                        <input type="text" id="internationalAccount" placeholder="IBAN أو رقم الحساب" required>
+                    </div>
+                    <button type="submit" class="btn-modal">تنفيذ الحوالة</button>
+                </form>
+                <button class="btn-close-modal" onclick="closeModal('internationalModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال المعاملات الكامل ========== -->
+        <div id="historyModal" class="modal-overlay">
             <div class="modal-content" style="max-width:500px;">
-                <div class="modal-header">
-                    <h2>📋 سجل المعاملات</h2>
-                    <button class="modal-close" onclick="closeModal('historyModal')">✕</button>
-                </div>
-                <div id="historyList">
-                    <!-- تُملأ بالجافاسكريبت -->
-                </div>
+                <h2>📋 سجل المعاملات</h2>
+                <div id="fullHistory" class="history-list" style="max-height:400px;"></div>
+                <button class="btn-close-modal" onclick="closeModal('historyModal')">إغلاق</button>
             </div>
         </div>
 
-        <!-- ====== مودال لوحة الأدمن ====== -->
-        <div id="adminModal" class="modal">
-            <div class="modal-content" style="max-width:600px;">
-                <div class="modal-header">
-                    <h2>👑 لوحة تحكم الأدمن</h2>
-                    <button class="modal-close" onclick="closeModal('adminModal')">✕</button>
-                </div>
-                <div id="adminContent">
-                    <!-- تُملأ بالجافاسكريبت -->
-                </div>
+        <!-- ========== مودال خدمة العملاء ========== -->
+        <div id="supportModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>👤 خدمة العملاء</h2>
+                <div id="chatMessages" class="chat-messages"></div>
+                <form id="supportForm" style="display:flex; gap:10px; margin-top:10px;">
+                    <input type="text" id="supportMessage" placeholder="اكتب رسالتك..." style="flex:1; padding:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white;">
+                    <button type="submit" style="padding:12px 20px; background:#f0c040; border:none; border-radius:12px; color:#0a0e1a; font-weight:700;">إرسال</button>
+                </form>
+                <button class="btn-close-modal" onclick="closeModal('supportModal')">إغلاق</button>
             </div>
         </div>
 
-        <!-- ====== إشعار "منبق" لعدم كفاية الرصيد ====== -->
+        <!-- ========== مودال الفروع ========== -->
+        <div id="branchesModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>📍 الفروع</h2>
+                <div id="branchesList" class="branches-list"></div>
+                <button class="btn-close-modal" onclick="closeModal('branchesModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال الإعانات ========== -->
+        <div id="subsidiesModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>💵 إعانات الصرف</h2>
+                <div id="subsidiesList" class="subsidies-list"></div>
+                <button class="btn-modal" onclick="requestSubsidy()">طلب إعانة</button>
+                <button class="btn-close-modal" onclick="closeModal('subsidiesModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال العروض ========== -->
+        <div id="offersModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>🎯 العروض الحصرية</h2>
+                <div id="offersList" class="offers-list"></div>
+                <button class="btn-close-modal" onclick="closeModal('offersModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال لوحة الأدمن ========== -->
+        <div id="adminModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:700px;">
+                <h2>👑 لوحة تحكم الإدارة</h2>
+                <div id="adminContent"></div>
+                <button class="btn-close-modal" onclick="closeModal('adminModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== إشعار "منبق" ========== -->
         <div id="insufficientNotification" class="insufficient-notification">
             <div class="emoji">😤</div>
             <div class="title">منبق!</div>
-            <div class="subtitle">عفواً، رصيدك غير كافٍ لإتمام هذه العملية</div>
-            <div class="amount-details">
-                <div><span>الرصيد المتاح:</span><span id="insufficientBalance">0.00 SDG</span></div>
-                <div><span>المبلغ المطلوب:</span><span id="insufficientRequired">0.00 SDG</span></div>
-                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:5px; margin-top:5px;">
+            <div class="subtitle">عفواً، رصيدك غير كافٍ</div>
+            <div style="background:rgba(255,255,255,0.05); padding:10px 20px; border-radius:12px; width:100%;">
+                <div style="display:flex; justify-content:space-between; padding:3px 0;">
+                    <span>الرصيد المتاح:</span>
+                    <span id="insufficientBalance">0.00 SDG</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:3px 0;">
+                    <span>المبلغ المطلوب:</span>
+                    <span id="insufficientRequired">0.00 SDG</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:3px 0; border-top:1px solid rgba(255,255,255,0.1); margin-top:5px; padding-top:5px;">
                     <span style="color:#e74c3c;">العجز:</span>
                     <span style="color:#e74c3c;" id="insufficientShortfall">0.00 SDG</span>
                 </div>
@@ -177,14 +386,11 @@
             <button class="btn-close-insufficient" onclick="closeInsufficientNotification()">حسناً، فهمت</button>
         </div>
 
-        <!-- ====== إشعار التحويل ====== -->
+        <!-- ========== إشعار التحويل ========== -->
         <div id="transferNotification" class="notification-toast">
-            <div class="message" id="notifMessage">✅ تم التحويل بنجاح</div>
-            <div class="sub" id="notifSub">المبلغ: 0.00 SDG إلى حساب: ...</div>
-            <div class="btn-group">
-                <button class="btn btn-gold" onclick="downloadReceipt()">📥 تنزيل الإيصال (صورة)</button>
-                <button class="btn btn-secondary" onclick="closeNotification()">إغلاق</button>
-            </div>
+            <div class="message" id="notifMessage">✅ تمت العملية بنجاح</div>
+            <div class="sub" id="notifSub"></div>
+            <button class="btn-close-notification" onclick="closeNotification()">✕</button>
         </div>
 
     </div>
