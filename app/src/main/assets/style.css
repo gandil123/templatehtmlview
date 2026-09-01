@@ -23,11 +23,27 @@ body {
     max-height: 900px;
     background: linear-gradient(145deg, #0f1a2e, #1a2a4a);
     border-radius: 30px;
-    padding: 20px 15px;
+    padding: 15px 15px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ========== شريط التمرير الصغير ========== */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* ========== الصفحات ========== */
@@ -142,7 +158,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0 15px;
+    padding: 5px 0 10px;
     position: relative;
 }
 
@@ -151,12 +167,12 @@ body {
 }
 
 .header .user-info .greeting {
-    font-size: 14px;
+    font-size: 13px;
     opacity: 0.6;
 }
 
 .header .user-info .name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
 }
 
@@ -169,10 +185,10 @@ body {
     background: rgba(255,255,255,0.05);
     border: none;
     color: white;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     transition: 0.3s;
     position: relative;
@@ -196,122 +212,984 @@ body {
 
 .total-balance {
     background: rgba(255,255,255,0.03);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 15px;
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 12px;
     border: 1px solid rgba(255,255,255,0.05);
 }
 
 .total-balance .label {
     color: rgba(255,255,255,0.5);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .total-balance .amount {
     color: white;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
-    margin-top: 5px;
+    margin-top: 3px;
 }
 
 .total-balance .amount .currency {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.5;
     margin-right: 5px;
 }
 
-.btn-small {
-    padding: 8px 18px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
+/* ========== حاوية البطاقات القابلة للتمرير ========== */
+.cards-scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+    margin: 5px 0 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.cards-scroll-container::-webkit-scrollbar {
+    height: 2px;
+}
+.cards-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(240, 192, 64, 0.3);
+    border-radius: 10px;
+}
+
+.cards-scroll {
+    display: inline-flex;
+    gap: 15px;
+    padding: 0 5px;
+}
+
+/* ========== بطاقات الفيزا ========== */
+.virtual-card {
+    min-width: 250px;
+    max-width: 280px;
+    height: 160px;
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    user-select: none;
+}
+
+.virtual-card:active {
+    transform: scale(0.92);
+    transition: transform 0.15s ease;
+}
+
+.virtual-card.pressed {
+    animation: cardPress 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cardPress {
+    0% { transform: scale(1); }
+    30% { transform: scale(0.92); }
+    60% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* أنواع البطاقات */
+.virtual-card.classic {
+    background: linear-gradient(145deg, #1a2a5a, #0f1a3a);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.virtual-card.classic .card-chip {
+    background: linear-gradient(135deg, #d4af37, #f5d76e);
+}
+
+.virtual-card.normal {
+    background: linear-gradient(145deg, #2d1b4a, #1a0f2a);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.virtual-card.normal .card-chip {
+    background: linear-gradient(135deg, #a8a8a8, #d0d0d0);
+}
+
+.virtual-card.gold {
+    background: linear-gradient(145deg, #4a3520, #2a1a0f);
+    border-color: rgba(240, 192, 64, 0.3);
+    box-shadow: 0 10px 30px rgba(240, 192, 64, 0.15);
+}
+
+.virtual-card.gold .card-chip {
+    background: linear-gradient(135deg, #f0c040, #d4a020);
+}
+
+.virtual-card.gold .card-brand {
+    color: #f0c040;
+}
+
+.virtual-card.gold .card-number {
+    color: #f5e6b0;
+}
+
+.virtual-card .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.virtual-card .card-brand {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.virtual-card .card-chip {
+    width: 30px;
+    height: 20px;
+    border-radius: 5px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
+
+.virtual-card .card-number {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.05);
+    margin: 8px 0;
+}
+
+.virtual-card .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.virtual-card .card-name {
+    font-size: 12px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    letter-spacing: 0.5px;
+}
+
+.virtual-card .card-expiry {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.virtual-card .card-type-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    padding: 2px 10px;
     border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+    opacity: 0.5;
+}
+
+.virtual-card .card-amount-fly {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    font-size: 28px;
+    font-weight: 800;
+    color: #f0c040;
+    text-shadow: 0 0 30px rgba(240, 192, 64, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s ease;
+}
+
+.virtual-card.flying .card-amount-fly {
+    opacity: 1;
+    transform: translate(-50%, -80%);
+    animation: floatAmount 1.2s ease-out forwards;
+}
+
+@keyframes floatAmount {
+    0% { opacity: 0; transform: translate(-50%, 50%) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, -30%) scale(1.2); }
+    60% { opacity: 1; transform: translate(-50%, -80%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -150%) scale(0.8); }
+}
+
+/* ========== أزرار القائمة السريعة ========== */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 5px 0 10px;
+}
+
+.quick-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 12px 3px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 11px;
+}
+
+.quick-btn:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.quick-btn .icon {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.quick-btn.primary {
+    background: linear-gradient(135deg, #f0c040, #d4a020);
+    color: #0a0e1a;
+    font-weight: 600;
+}
+
+.quick-btn.primary:hover {
+    box-shadow: 0 8px 25px rgba(240, 192, 64, 0.3);
+}
+
+/* ========== القائمة السفلية ========== */
+.bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    padding: 6px;
+    margin-top: auto;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    padding: 8px 3px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 10px;
+    font-size: 10px;
+}
+
+.nav-item .nav-icon {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.nav-item.active {
+    background: rgba(240, 192, 64, 0.15);
+    color: #f0c040;
+}
+
+.nav-item:hover {
+    color: white;
+}
+
+/* ========== صفحة المزيد ========== */
+.more-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 10px 0;
+    flex: 1;
+    align-content: start;
+}
+
+.more-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 16px 8px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.more-item:hover {
+    background: rgba(255,255,255,0.08);
+    transform: scale(1.02);
+}
+
+.more-item .icon {
+    font-size: 26px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.more-item .label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 5px;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ========== مودالات ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 15px;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal-content {
+    background: #1a2a4a;
+    border-radius: 22px;
+    padding: 25px;
+    max-width: 450px;
+    width: 100%;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 2px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 18px;
+    color: #f0c040;
+    font-size: 20px;
+}
+
+.modal-content .form-group {
+    margin-bottom: 12px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    margin-bottom: 4px;
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select,
+.modal-content .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group select:focus,
+.modal-content .form-group textarea:focus {
+    outline: none;
+    border-color: #f0c040;
+}
+
+.modal-content .btn-modal {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #f0c040, #d4a020);
+    border: none;
+    border-radius: 12px;
+    color: #0a0e1a;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.modal-content .btn-modal:hover {
+    transform: scale(1.02);
+}
+
+.modal-content .btn-close-modal {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+/* ========== فواتير الخدمات ========== */
+.bills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.bill-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px 8px;
     color: white;
     cursor: pointer;
     font-size: 13px;
     transition: 0.3s;
+    text-align: center;
 }
 
-.btn-small:hover {
-    background: rgba(255,255,255,0.15);
+.bill-btn:hover {
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.05);
 }
 
-/* ========== البطاقة الثلاثية الأبعاد ========== */
-.card-3d-container {
-    perspective: 1000px;
-    margin: 5px 0 15px;
-    height: 180px;
-    cursor: pointer;
-    position: relative;
-}
-
-.card-3d {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.1s ease;
-    border-radius: 20px;
-}
-
-.card-3d .card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 20px;
-    backface-visibility: hidden;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: linear-gradient(145deg, #1a2a5a, #0f1a3a);
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-}
-
-.card-3d .card-face .card-brand {
-    font-size: 14px;
-    color: #f0c040;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.card-3d .card-face .card-number {
-    font-family: 'Courier New', monospace;
-    font-size: 18px;
-    color: white;
-    letter-spacing: 3px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.1);
-}
-
-.card-3d .card-face .card-row {
+/* ========== البطاقات في الإدارة ========== */
+.cards-list .card-item {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.card-3d .card-face .card-name {
-    color: rgba(255,255,255,0.7);
-    font-size: 13px;
-    text-transform: uppercase;
+.card-item .card-info .number {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
 }
 
-.card-3d .card-face .card-expiry {
-    color: rgba(255,255,255,0.5);
+.card-item .card-info .type {
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+.card-item .card-status {
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.card-item .card-status.active {
+    background: rgba(46, 204, 113, 0.25);
+    color: #2ecc71;
+}
+
+.card-item .card-status.blocked {
+    background: rgba(231, 76, 60, 0.25);
+    color: #e74c3c;
+}
+
+.card-item .card-actions button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.card-item .card-actions button:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ========== أسعار الصرف ========== */
+.exchange-rates {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.exchange-rates .rate-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+}
+
+.exchange-rates .rate-row:last-child {
+    border-bottom: none;
+}
+
+/* ========== خدمة العملاء ========== */
+.chat-messages {
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 8px 0;
+}
+
+.chat-message {
+    padding: 8px 14px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    max-width: 80%;
+    font-size: 14px;
+}
+
+.chat-message.user {
+    background: rgba(240, 192, 64, 0.2);
+    margin-left: auto;
+    border: 1px solid rgba(240, 192, 64, 0.15);
+}
+
+.chat-message.support {
+    background: rgba(255,255,255,0.05);
+    margin-right: auto;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ========== الرسائل (الشات) ========== */
+.chat-users-list .chat-user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.chat-users-list .chat-user-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.chat-user-item .user-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.chat-user-item .user-last-msg {
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.chat-user-item .user-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.chat-messages-list .chat-msg {
+    padding: 8px 14px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    max-width: 80%;
+    font-size: 13px;
+}
+
+.chat-msg.sent {
+    background: rgba(240, 192, 64, 0.2);
+    margin-left: auto;
+    border: 1px solid rgba(240, 192, 64, 0.15);
+}
+
+.chat-msg.received {
+    background: rgba(255,255,255,0.05);
+    margin-right: auto;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.chat-msg .msg-time {
+    font-size: 9px;
+    opacity: 0.4;
+    margin-top: 3px;
+    display: block;
+}
+
+/* ========== الفروع ========== */
+.branches-list .branch-item {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.branch-item .branch-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.branch-item .branch-address {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.branch-item .branch-hours {
+    font-size: 11px;
+    opacity: 0.4;
+}
+
+/* ========== لوحة الأدمن ========== */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.admin-stat {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+.admin-stat .admin-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f0c040;
+}
+
+.admin-stat .admin-stat-label {
+    font-size: 10px;
+    opacity: 0.5;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+}
+
+.admin-actions .btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.admin-actions .btn-primary {
+    background: #f0c040;
+    color: #0a0e1a;
+}
+.admin-actions .btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+.admin-actions .btn-success {
+    background: #2ecc71;
+    color: white;
+}
+.admin-actions .btn-info {
+    background: #3498db;
+    color: white;
+}
+.admin-actions .btn:hover {
+    transform: scale(1.03);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
     font-size: 12px;
 }
 
-.card-3d .card-face .chip {
-    width: 35px;
-    height: 25px;
-    background: linear-gradient(135deg, #d4af37, #f5d76e);
-    border-radius: 6px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+.user-table th {
+    text-align: right;
+    padding: 6px 6px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.user-table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.user-table .status-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.user-table .status-badge.active {
+    background: rgba(46, 204, 113, 0.25);
+    color: #2ecc71;
+}
+
+.user-table .status-badge.banned {
+    background: rgba(231, 76, 60, 0.25);
+    color: #e74c3c;
+}
+
+.user-table .action-btns {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.user-table .action-btns button {
+    padding: 2px 6px;
+    border: none;
+    border-radius: 5px;
+    font-size: 9px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+}
+
+.user-table .action-btns .btn-ban {
+    background: #e74c3c;
+    color: white;
+}
+.user-table .action-btns .btn-unban {
+    background: #2ecc71;
+    color: white;
+}
+.user-table .action-btns .btn-delete {
+    background: #c0392b;
+    color: white;
+}
+.user-table .action-btns .btn-add {
+    background: #f39c12;
+    color: white;
+}
+.user-table .action-btns .btn-edit {
+    background: #3498db;
+    color: white;
+}
+.user-table .action-btns .btn-deduct {
+    background: #e67e22;
+    color: white;
+}
+.user-table .action-btns button:hover {
+    transform: scale(1.05);
+    opacity: 0.85;
+}
+
+/* ========== سجل المعاملات ========== */
+.history-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 6px 0;
+}
+
+.history-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-item .info .desc {
+    font-size: 13px;
+}
+
+.history-item .info .date {
+    font-size: 10px;
+    opacity: 0.4;
+}
+
+.history-item .info .details {
+    font-size: 9px;
+    opacity: 0.3;
+}
+
+.history-item .amount {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.history-item .amount.positive { color: #2ecc71; }
+.history-item .amount.negative { color: #e74c3c; }
+
+/* ========== إشعار "منبق" ========== */
+.insufficient-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #1a1a2e, #2d1b3d);
+    border: 2px solid #e74c3c;
+    padding: 30px 35px;
+    border-radius: 25px;
+    color: white;
+    z-index: 3000;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.insufficient-notification.show {
+    display: flex;
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.insufficient-notification .emoji {
+    font-size: 44px;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+.insufficient-notification .title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #e74c3c;
+}
+
+.insufficient-notification .subtitle {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+.insufficient-notification .btn-close-insufficient {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    padding: 10px 35px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 5px;
+}
+
+.insufficient-notification .btn-close-insufficient:hover {
+    background: #c0392b;
+}
+
+/* ========== إشعار التحويل ========== */
+.notification-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e1e2f;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px 25px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 250px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    animation: slideUp 0.3s ease;
+}
+
+.notification-toast.show {
+    display: flex;
+}
+
+.notification-toast .message {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.notification-toast .sub {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+.notification-toast .btn-close-notification {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: white;
+    padding: 5px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.3s;
+    margin-top: 3px;
+}
+
+.notification-toast .btn-close-notification:hover {
+    background: rgba(255,255,255,0.15);
 }
 
 /* ========== تأثير النقود المتطايرة ========== */
 .flying-money {
     position: fixed;
-    font-size: 24px;
+    font-size: 22px;
     pointer-events: none;
     z-index: 9999;
     animation: flyMoney 1.2s ease-out forwards;
@@ -328,817 +1206,98 @@ body {
     }
 }
 
-/* ========== أزرار القائمة السريعة ========== */
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 5px 0 10px;
-}
-
-.quick-btn {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 14px 5px;
-    color: white;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
-    font-size: 12px;
-}
-
-.quick-btn:hover {
-    background: rgba(255,255,255,0.1);
-    transform: translateY(-2px);
-}
-
-.quick-btn .icon {
-    font-size: 26px;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.quick-btn.primary {
-    background: linear-gradient(135deg, #f0c040, #d4a020);
-    color: #0a0e1a;
-    font-weight: 600;
-}
-
-.quick-btn.primary:hover {
-    box-shadow: 0 8px 25px rgba(240, 192, 64, 0.3);
-}
-
-/* ========== الإحصائيات ========== */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 5px 0 10px;
-}
-
-.stat-item {
-    background: rgba(255,255,255,0.03);
-    border-radius: 14px;
-    padding: 12px 8px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.stat-item .stat-label {
-    display: block;
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 5px;
-}
-
-.stat-item .stat-value {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: white;
-}
-
-/* ========== القائمة السفلية ========== */
-.bottom-nav {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 20px;
-    padding: 8px;
-    margin-top: auto;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.nav-item {
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.4);
-    padding: 10px 5px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
-    border-radius: 12px;
-    font-size: 11px;
-}
-
-.nav-item .nav-icon {
-    font-size: 22px;
-    display: block;
-    margin-bottom: 3px;
-}
-
-.nav-item.active {
-    background: rgba(240, 192, 64, 0.15);
-    color: #f0c040;
-}
-
-.nav-item:hover {
-    color: white;
-}
-
-/* ========== صفحة المزيد ========== */
-.more-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin: 10px 0;
-    flex: 1;
-    align-content: start;
-}
-
-.more-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 20px 10px;
-    color: white;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.more-item:hover {
-    background: rgba(255,255,255,0.08);
-    transform: scale(1.02);
-}
-
-.more-item .icon {
-    font-size: 30px;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.more-item .label {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.back-btn {
-    background: rgba(255,255,255,0.05);
-    border: none;
-    color: white;
-    padding: 12px;
-    border-radius: 14px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
-}
-
-.back-btn:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-/* ========== مودالات ========== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(15px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
-}
-
-.modal-overlay.open {
-    display: flex;
-}
-
-.modal-content {
-    background: #1a2a4a;
-    border-radius: 25px;
-    padding: 30px;
-    max-width: 450px;
-    width: 100%;
-    color: white;
-    border: 1px solid rgba(255,255,255,0.1);
-    animation: slideUp 0.3s ease;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(40px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-content h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #f0c040;
-}
-
-.modal-content .form-group {
-    margin-bottom: 15px;
-}
-
-.modal-content .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    opacity: 0.7;
-    font-size: 13px;
-}
-
-.modal-content .form-group input,
-.modal-content .form-group select {
-    width: 100%;
-    padding: 14px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    color: white;
-    font-size: 16px;
-}
-
-.modal-content .form-group input:focus,
-.modal-content .form-group select:focus {
-    outline: none;
-    border-color: #f0c040;
-}
-
-.modal-content .btn-modal {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #f0c040, #d4a020);
-    border: none;
-    border-radius: 12px;
-    color: #0a0e1a;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.modal-content .btn-modal:hover {
-    transform: scale(1.02);
-}
-
-.modal-content .btn-close-modal {
-    width: 100%;
-    padding: 12px;
-    background: rgba(255,255,255,0.05);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-/* ========== فواتير الخدمات ========== */
-.bills-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.bill-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px;
-    padding: 15px 10px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.3s;
-    text-align: center;
-}
-
-.bill-btn:hover {
-    background: rgba(255,255,255,0.1);
-    transform: scale(1.05);
-}
-
-/* ========== البطاقات ========== */
-.cards-list {
-    margin: 10px 0;
-}
-
-.card-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-item .card-info .number {
-    font-family: 'Courier New', monospace;
-    font-size: 16px;
-    letter-spacing: 2px;
-}
-
-.card-item .card-info .type {
-    font-size: 12px;
-    opacity: 0.5;
-}
-
-.card-item .card-status {
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.card-item .card-status.active {
-    background: rgba(46, 204, 113, 0.3);
-    color: #2ecc71;
-}
-
-.card-item .card-status.blocked {
-    background: rgba(231, 76, 60, 0.3);
-    color: #e74c3c;
-}
-
-.card-item .card-actions button {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 5px 8px;
-    border-radius: 8px;
-    transition: 0.3s;
-}
-
-.card-item .card-actions button:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-/* ========== أسعار الصرف ========== */
-.exchange-rates {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.exchange-rates .rate-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.exchange-rates .rate-row:last-child {
-    border-bottom: none;
-}
-
-/* ========== خدمة العملاء ========== */
-.chat-messages {
-    max-height: 300px;
-    overflow-y: auto;
-    margin: 10px 0;
-}
-
-.chat-message {
-    padding: 10px 15px;
-    border-radius: 14px;
-    margin-bottom: 8px;
-    max-width: 80%;
-}
-
-.chat-message.user {
-    background: rgba(240, 192, 64, 0.2);
-    margin-left: auto;
-    border: 1px solid rgba(240, 192, 64, 0.2);
-}
-
-.chat-message.support {
-    background: rgba(255,255,255,0.05);
-    margin-right: auto;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-/* ========== الفروع ========== */
-.branches-list .branch-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-.branch-item .branch-name {
-    font-weight: 700;
-    font-size: 16px;
-}
-
-.branch-item .branch-address {
-    font-size: 13px;
-    opacity: 0.6;
-}
-
-.branch-item .branch-hours {
-    font-size: 12px;
-    opacity: 0.4;
-}
-
-/* ========== الإعانات ========== */
-.subsidies-list .subsidy-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-.subsidy-item .subsidy-name {
-    font-weight: 700;
-}
-
-.subsidy-item .subsidy-amount {
-    color: #2ecc71;
-    font-weight: 700;
-}
-
-.subsidy-item .subsidy-status {
-    font-size: 12px;
-    opacity: 0.5;
-}
-
-/* ========== العروض ========== */
-.offers-list .offer-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(240, 192, 64, 0.2);
-}
-
-.offer-item .offer-title {
-    font-weight: 700;
-    color: #f0c040;
-}
-
-.offer-item .offer-desc {
-    font-size: 13px;
-    opacity: 0.7;
-}
-
-/* ========== إشعار "منبق" ========== */
-.insufficient-notification {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, #1a1a2e, #2d1b3d);
-    border: 2px solid #e74c3c;
-    padding: 35px 40px;
-    border-radius: 30px;
-    color: white;
-    z-index: 3000;
-    text-align: center;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    min-width: 280px;
-    animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.insufficient-notification.show {
-    display: flex;
-}
-
-@keyframes popIn {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-.insufficient-notification .emoji {
-    font-size: 50px;
-    animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
-}
-
-.insufficient-notification .title {
-    font-size: 26px;
-    font-weight: 800;
-    color: #e74c3c;
-}
-
-.insufficient-notification .subtitle {
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-.insufficient-notification .btn-close-insufficient {
-    background: #e74c3c;
-    border: none;
-    color: white;
-    padding: 12px 40px;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 5px;
-}
-
-.insufficient-notification .btn-close-insufficient:hover {
-    background: #c0392b;
-}
-
-/* ========== إشعار التحويل ========== */
-.notification-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e1e2f;
-    border: 1px solid rgba(255,255,255,0.15);
-    padding: 20px 30px;
-    border-radius: 20px;
-    color: white;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    z-index: 2000;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 280px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    animation: slideUp 0.4s ease;
-}
-
-.notification-toast.show {
-    display: flex;
-}
-
-.notification-toast .message {
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.notification-toast .sub {
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-.notification-toast .btn-close-notification {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    padding: 8px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.3s;
-    margin-top: 5px;
-}
-
-.notification-toast .btn-close-notification:hover {
-    background: rgba(255,255,255,0.2);
-}
-
-/* ========== سجل المعاملات ========== */
-.history-list {
-    max-height: 300px;
-    overflow-y: auto;
-    margin: 10px 0;
-}
-
-.history-item {
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.history-item .info .desc {
-    font-size: 14px;
-}
-
-.history-item .info .date {
-    font-size: 11px;
-    opacity: 0.5;
-}
-
-.history-item .info .details {
-    font-size: 10px;
-    opacity: 0.3;
-}
-
-.history-item .amount {
-    font-weight: 700;
-    font-size: 16px;
-}
-
-.history-item .amount.positive { color: #2ecc71; }
-.history-item .amount.negative { color: #e74c3c; }
-
-/* ========== لوحة الأدمن ========== */
-.admin-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.admin-stat {
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-}
-
-.admin-stat .admin-stat-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: #f0c040;
-}
-
-.admin-stat .admin-stat-label {
-    font-size: 11px;
-    opacity: 0.5;
-}
-
-.user-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.user-table th {
-    text-align: right;
-    padding: 8px;
-    background: rgba(255,255,255,0.05);
-    border-bottom: 2px solid rgba(255,255,255,0.1);
-    font-size: 12px;
-    opacity: 0.7;
-}
-
-.user-table td {
-    padding: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 13px;
-}
-
-.user-table .status-badge {
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.user-table .status-badge.active {
-    background: rgba(46, 204, 113, 0.3);
-    color: #2ecc71;
-}
-
-.user-table .status-badge.banned {
-    background: rgba(231, 76, 60, 0.3);
-    color: #e74c3c;
-}
-
-.user-table .action-btns {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.user-table .action-btns button {
-    padding: 3px 8px;
-    border: none;
-    border-radius: 6px;
-    font-size: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: 600;
-}
-
-.user-table .action-btns .btn-ban {
-    background: #e74c3c;
-    color: white;
-}
-
-.user-table .action-btns .btn-unban {
-    background: #2ecc71;
-    color: white;
-}
-
-.user-table .action-btns .btn-delete {
-    background: #c0392b;
-    color: white;
-}
-
-.user-table .action-btns .btn-add {
-    background: #f39c12;
-    color: white;
-}
-
-.user-table .action-btns .btn-edit {
-    background: #3498db;
-    color: white;
-}
-
-.user-table .action-btns button:hover {
-    transform: scale(1.05);
-    opacity: 0.8;
-}
-
-.admin-actions {
-    display: flex;
-    gap: 10px;
-    margin: 10px 0;
-    flex-wrap: wrap;
-}
-
-.admin-actions .btn {
-    flex: 1;
-    min-width: 80px;
-    padding: 10px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-.admin-actions .btn-primary {
-    background: #f0c040;
-    color: #0a0e1a;
-}
-
-.admin-actions .btn-danger {
-    background: #e74c3c;
-    color: white;
-}
-
-.admin-actions .btn:hover {
-    transform: scale(1.02);
-}
-
-/* ========== تمرير ========== */
-::-webkit-scrollbar {
-    width: 3px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 10px;
-}
-
 /* ========== استجابة للجوال ========== */
 @media (max-width: 500px) {
-    .card-3d-container {
-        height: 160px;
+    #app {
+        border-radius: 20px;
+        padding: 12px 12px;
+        max-height: 100vh;
+        height: 100vh;
     }
-    .card-3d .card-face .card-number {
-        font-size: 15px;
+    .virtual-card {
+        min-width: 200px;
+        height: 130px;
+        padding: 14px 16px;
+    }
+    .virtual-card .card-number {
+        font-size: 13px;
+    }
+    .virtual-card .card-brand {
+        font-size: 11px;
     }
     .quick-actions {
         grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
+        gap: 5px;
     }
     .quick-btn {
-        padding: 10px 3px;
-        font-size: 11px;
+        padding: 8px 3px;
+        font-size: 10px;
     }
     .quick-btn .icon {
-        font-size: 20px;
+        font-size: 18px;
     }
-    .stats-row {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-    }
-    .stat-item .stat-value {
-        font-size: 14px;
+    .total-balance .amount {
+        font-size: 22px;
     }
     .modal-content {
-        padding: 20px;
-        margin: 10px;
+        padding: 18px;
+        margin: 8px;
     }
     .bills-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     .more-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 6px;
+    }
+    .more-item {
+        padding: 12px 6px;
+    }
+    .more-item .icon {
+        font-size: 20px;
+    }
+    .more-item .label {
+        font-size: 11px;
     }
     .admin-stats {
         grid-template-columns: repeat(2, 1fr);
+    }
+    .user-table {
+        font-size: 10px;
+    }
+    .user-table th,
+    .user-table td {
+        padding: 4px 4px;
+    }
+    .user-table .action-btns button {
+        font-size: 8px;
+        padding: 2px 5px;
+    }
+    .cards-scroll-container {
+        padding: 5px 0;
+    }
+    .header .user-info .name {
+        font-size: 16px;
+    }
+    .header .notif-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+    #notifCount {
+        font-size: 8px;
+        min-width: 14px;
+        padding: 1px 4px;
+    }
+    .insufficient-notification {
+        padding: 20px 25px;
+        min-width: 220px;
+    }
+    .insufficient-notification .title {
+        font-size: 20px;
+    }
+    .notification-toast {
+        padding: 12px 18px;
+        min-width: 200px;
     }
     }
