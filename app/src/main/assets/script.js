@@ -32,23 +32,11 @@ const DB = {
     setBills(bills) {
         localStorage.setItem('bank_bills', JSON.stringify(bills));
     },
-    getSubsidies() {
-        return JSON.parse(localStorage.getItem('bank_subsidies')) || [];
+    getMessages() {
+        return JSON.parse(localStorage.getItem('bank_messages')) || [];
     },
-    setSubsidies(subsidies) {
-        localStorage.setItem('bank_subsidies', JSON.stringify(subsidies));
-    },
-    getBranches() {
-        return JSON.parse(localStorage.getItem('bank_branches')) || [];
-    },
-    setBranches(branches) {
-        localStorage.setItem('bank_branches', JSON.stringify(branches));
-    },
-    getOffers() {
-        return JSON.parse(localStorage.getItem('bank_offers')) || [];
-    },
-    setOffers(offers) {
-        localStorage.setItem('bank_offers', JSON.stringify(offers));
+    setMessages(messages) {
+        localStorage.setItem('bank_messages', JSON.stringify(messages));
     },
     getNotifications() {
         return JSON.parse(localStorage.getItem('bank_notifications')) || [];
@@ -61,6 +49,18 @@ const DB = {
     },
     setBannedUsers(banned) {
         localStorage.setItem('banned_users', JSON.stringify(banned));
+    },
+    getBranches() {
+        return JSON.parse(localStorage.getItem('bank_branches')) || [];
+    },
+    setBranches(branches) {
+        localStorage.setItem('bank_branches', JSON.stringify(branches));
+    },
+    getOffers() {
+        return JSON.parse(localStorage.getItem('bank_offers')) || [];
+    },
+    setOffers(offers) {
+        localStorage.setItem('bank_offers', JSON.stringify(offers));
     },
     getCurrentUser() {
         return JSON.parse(sessionStorage.getItem('current_user'));
@@ -126,6 +126,22 @@ function getExchangeRate(from, to) {
     return rates[key] || 1;
 }
 
+function getCardColor(type) {
+    switch(type) {
+        case 'كلاسيك': return 'classic';
+        case 'ذهبية': return 'gold';
+        default: return 'normal';
+    }
+}
+
+function getCardEmoji(type) {
+    switch(type) {
+        case 'كلاسيك': return '💳';
+        case 'ذهبية': return '✨';
+        default: return '💳';
+    }
+}
+
 // ============================================================
 //  تهيئة البيانات الأولية
 // ============================================================
@@ -188,6 +204,7 @@ function showDashboard() {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('dashboardPage').classList.add('active');
     updateDashboard();
+    renderCards();
 }
 
 function showMorePage() {
@@ -207,6 +224,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     const confirm = document.getElementById('regConfirmPassword').value;
     const accountType = document.getElementById('regAccountType').value;
     const currency = document.getElementById('regCurrency').value;
+    const cardType = document.getElementById('regCardType').value;
 
     if (!fullName || !username || !password) {
         showNotification('يرجى ملء جميع الحقول', 'error');
@@ -246,9 +264,6 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     const newAccount = {
         userId: newUser.id,
         accountNumber: generateAccountNumber(),
-        cardNumber: generateCardNumber(),
-        cardExpiry: generateExpiry(),
-        cvv: generateCVV(),
         balance: 1000.00,
         accountType: accountType,
         currency: currency,
@@ -257,16 +272,20 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     accounts.push(newAccount);
     DB.setAccounts(accounts);
 
-    // إنشاء بطاقة افتراضية
+    // إنشاء بطاقة فيزا حسب النوع المختار
     const cards = DB.getCards();
+    const cardNumber = generateCardNumber();
     cards.push({
         id: Date.now(),
         userId: newUser.id,
-        cardNumber: generateCardNumber(),
-        cardType: 'فيزا كلاسيك',
+        cardNumber: cardNumber,
+        cardType: cardType,
+        cardStyle: getCardColor(cardType),
         expiry: generateExpiry(),
+        cvv: generateCVV(),
         status: 'نشط',
-        isDefault: true
+        isDefault: true,
+        balance: 1000.00
     });
     DB.setCards(cards);
 
@@ -309,6 +328,126 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 });
 
 // ============================================================
+//  عرض البطاقات القابلة للتمرير
+// ============================================================
+function renderCards() {
+    const user = DB.getCurrentUser();
+    if (!user) return;
+
+    const cards = DB.getCards();
+    const userCards = cards.filter(c => c.userId === user.id);
+
+    const container = document.getElementById('cardsScroll');
+
+    if (userCards.length === 0) {
+        container.innerHTML = `<div style="color:rgba(255,255,255,0.3); padding:10px; text-align:center; width:100%;">لا توجد بطاقات</div>`;
+        return;
+    }
+
+    container.innerHTML = userCards.map(c => {
+        const cardStyle = c.cardStyle || getCardColor(c.cardType);
+        const emoji = getCardEmoji(c.cardType);
+        const cardTypeLabel = c.cardType || 'كلاسيك';
+        
+        return `
+            <div class="virtual-card ${cardStyle}" 
+                 data-card-id="${c.id}"
+                 onclick="handleCardClick(${c.id}, event)"
+                 style="cursor:pointer;">
+                <div class="card-top">
+                    <span class="card-brand">✦ بنك الياد</span>
+                    <div class="card-chip"></div>
+                </div>
+                <div class="card-number">${c.cardNumber}</div>
+                <div class="card-bottom">
+                    <div>
+                        <div class="card-name">${user.fullName}</div>
+                    </div>
+                    <div>
+                        <div class="card-expiry">صالح حتى ${c.expiry}</div>
+                    </div>
+                </div>
+                <div class="card-type-badge">${emoji} ${cardTypeLabel}</div>
+                <div class="card-amount-fly" id="amount-fly-${c.id}">+0.00</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================================
+//  معالجة النقر على البطاقة
+// ============================================================
+let lastCardClickTime = 0;
+
+function handleCardClick(cardId, event) {
+    const now = Date.now();
+    if (now - lastCardClickTime < 800) return; // منع النقر المتكرر
+    lastCardClickTime = now;
+
+    const cardEl = event.currentTarget;
+    const user = DB.getCurrentUser();
+    if (!user) return;
+
+    const accounts = DB.getAccounts();
+    const account = accounts.find(a => a.userId === user.id);
+    if (!account) return;
+
+    // تأثير الضغط - تصغر ثم ترتد
+    cardEl.classList.remove('pressed');
+    void cardEl.offsetWidth; // إعادة تعيين الأنيميشن
+    cardEl.classList.add('pressed');
+
+    // عرض المبلغ على البطاقة
+    const amountFly = document.getElementById(`amount-fly-${cardId}`);
+    if (amountFly) {
+        const balance = account.balance || 0;
+        amountFly.textContent = `+${balance.toFixed(2)}`;
+        cardEl.classList.add('flying');
+        setTimeout(() => {
+            cardEl.classList.remove('flying');
+        }, 1200);
+    }
+
+    // تأثير النقود المتطايرة
+    triggerFlyingMoney(event || { clientX: window.innerWidth/2, clientY: window.innerHeight/2 });
+
+    // إظهار الرصيد كإشعار
+    setTimeout(() => {
+        showNotification(`💰 رصيدك: ${account.balance.toFixed(2)} ${account.currency || 'SDG'}`);
+    }, 400);
+}
+
+// ============================================================
+//  تأثير النقود المتطايرة
+// ============================================================
+function triggerFlyingMoney(event) {
+    const emojis = ['💵', '💰', '💸', '🪙', '💎', '💲', '🤑'];
+    const count = 20;
+
+    const x = event.clientX || window.innerWidth / 2;
+    const y = event.clientY || window.innerHeight / 2;
+
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'flying-money';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        el.style.left = (x + (Math.random() - 0.5) * 200) + 'px';
+        el.style.top = (y + (Math.random() - 0.5) * 200) + 'px';
+        
+        const tx = (Math.random() - 0.5) * 400;
+        const ty = -Math.random() * 350 - 100;
+        el.style.setProperty('--tx', tx + 'px');
+        el.style.setProperty('--ty', ty + 'px');
+        
+        el.style.fontSize = (18 + Math.random() * 22) + 'px';
+        
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1200);
+    }
+}
+
+// ============================================================
 //  تحديث لوحة التحكم
 // ============================================================
 function updateDashboard() {
@@ -324,42 +463,10 @@ function updateDashboard() {
     if (account) {
         document.getElementById('totalBalanceDisplay').innerHTML = 
             account.balance.toFixed(2) + ' <span class="currency">' + (account.currency || 'SDG') + '</span>';
-        
-        const cardContainer = document.getElementById('cardContainer');
-        if (account.accountType === 'جاري') {
-            cardContainer.style.display = 'block';
-            document.getElementById('cardNumberDisplay').textContent = account.cardNumber || generateCardNumber();
-            document.getElementById('cardHolderName').textContent = user.fullName;
-            document.getElementById('cardExpiry').textContent = account.cardExpiry || generateExpiry();
-        } else {
-            cardContainer.style.display = 'none';
-        }
     }
 
     renderRecentHistory();
-    updateStats();
     updateNotifications();
-}
-
-// ============================================================
-//  تحديث الإحصائيات
-// ============================================================
-function updateStats() {
-    const user = DB.getCurrentUser();
-    if (!user) return;
-
-    const transactions = DB.getTransactions();
-    const userTxs = transactions.filter(t => t.userId === user.id);
-
-    document.getElementById('txCount').textContent = userTxs.length;
-
-    const deposits = userTxs.filter(t => t.fromAccount === 'SYSTEM' || t.fromAccount === 'ADMIN');
-    const maxDeposit = deposits.reduce((max, t) => t.amount > max ? t.amount : max, 0);
-    document.getElementById('maxDeposit').textContent = formatCurrency(maxDeposit);
-
-    const withdrawals = userTxs.filter(t => t.fromAccount !== 'SYSTEM' && t.fromAccount !== 'ADMIN' && t.fromAccount !== user.id);
-    const maxWithdraw = withdrawals.reduce((max, t) => t.amount > max ? t.amount : max, 0);
-    document.getElementById('maxWithdraw').textContent = formatCurrency(maxWithdraw);
 }
 
 // ============================================================
@@ -388,7 +495,6 @@ function renderRecentHistory() {
                 <div class="info">
                     <div class="desc">${t.note || (isPositive ? 'إيداع' : 'تحويل')}</div>
                     <div class="date">${t.timestamp}</div>
-                    ${t.fromAccount !== 'SYSTEM' && t.fromAccount !== 'ADMIN' ? `<div class="details">من: ${t.fromAccount} → إلى: ${t.toAccount}</div>` : ''}
                 </div>
                 <div class="amount ${cls}">${sign} ${t.amount.toFixed(2)} ${t.currency || 'SDG'}</div>
             </div>
@@ -494,7 +600,6 @@ document.getElementById('transferForm').addEventListener('submit', function(e) {
         return;
     }
 
-    // تنفيذ التحويل
     fromAccount.balance -= amount;
     toAccountData.balance += amount;
     DB.setAccounts(accounts);
@@ -513,20 +618,18 @@ document.getElementById('transferForm').addEventListener('submit', function(e) {
     transactions.push(tx);
     DB.setTransactions(transactions);
 
-    // إضافة إشعار
-    const notifications = DB.getNotifications();
-    notifications.push({
-        id: Date.now(),
-        userId: user.id,
-        message: `✅ تم تحويل ${amount.toFixed(2)} ${fromAccount.currency || 'SDG'} إلى حساب ${toAccount}`,
-        timestamp: new Date().toLocaleString('ar-SA'),
-        read: false
-    });
-    DB.setNotifications(notifications);
+    // تحديث رصيد البطاقة الافتراضية
+    const cards = DB.getCards();
+    const defaultCard = cards.find(c => c.userId === user.id && c.isDefault);
+    if (defaultCard) {
+        defaultCard.balance = fromAccount.balance;
+        DB.setCards(cards);
+    }
 
     showNotification(`✅ تم تحويل ${amount.toFixed(2)} ${fromAccount.currency || 'SDG'} بنجاح`);
     closeModal('transferModal');
     updateDashboard();
+    renderCards();
 });
 
 // ============================================================
@@ -577,9 +680,18 @@ function payBill(service) {
     });
     DB.setTransactions(transactions);
 
+    // تحديث رصيد البطاقة
+    const cards = DB.getCards();
+    const defaultCard = cards.find(c => c.userId === user.id && c.isDefault);
+    if (defaultCard) {
+        defaultCard.balance = account.balance;
+        DB.setCards(cards);
+    }
+
     showNotification(`✅ تم دفع فاتورة ${service} بقيمة ${amount.toFixed(2)} ${account.currency || 'SDG'}`);
     closeModal('billsModal');
     updateDashboard();
+    renderCards();
 }
 
 // ============================================================
@@ -604,7 +716,8 @@ function openCards() {
             <div class="card-item">
                 <div class="card-info">
                     <div class="number">${c.cardNumber}</div>
-                    <div class="type">${c.cardType} • ${c.expiry}</div>
+                    <div class="type">${c.cardType || 'كلاسيك'} • ${c.expiry}</div>
+                    <div style="font-size:11px; opacity:0.4;">الرصيد: ${(c.balance || 0).toFixed(2)}</div>
                 </div>
                 <div>
                     <span class="card-status ${c.status === 'نشط' ? 'active' : 'blocked'}">${c.status}</span>
@@ -613,7 +726,7 @@ function openCards() {
                             `<button onclick="blockCard(${c.id})" title="حظر">🔒</button>` :
                             `<button onclick="unblockCard(${c.id})" title="إلغاء حظر">🔓</button>`
                         }
-                        ${c.isDefault ? '' : `<button onclick="setDefaultCard(${c.id})" title="تعيين كبطاقة افتراضية">⭐</button>`}
+                        ${c.isDefault ? '⭐' : `<button onclick="setDefaultCard(${c.id})" title="تعيين كبطاقة افتراضية">⭐</button>`}
                     </div>
                 </div>
             </div>
@@ -627,23 +740,34 @@ function addNewCard() {
     const user = DB.getCurrentUser();
     if (!user) return;
 
-    const cardType = prompt('اختر نوع البطاقة (فيزا كلاسيك، فيزا ذهبية، ماستركارد):');
+    const cardType = prompt('اختر نوع البطاقة (كلاسيك، عادية، ذهبية):');
     if (!cardType) return;
+    
+    const validTypes = ['كلاسيك', 'عادية', 'ذهبية'];
+    if (!validTypes.includes(cardType)) {
+        showNotification('نوع البطاقة غير صحيح', 'error');
+        return;
+    }
 
     const cards = DB.getCards();
+    const cardNumber = generateCardNumber();
     cards.push({
         id: Date.now(),
         userId: user.id,
-        cardNumber: generateCardNumber(),
+        cardNumber: cardNumber,
         cardType: cardType,
+        cardStyle: getCardColor(cardType),
         expiry: generateExpiry(),
+        cvv: generateCVV(),
         status: 'نشط',
-        isDefault: false
+        isDefault: false,
+        balance: 0
     });
     DB.setCards(cards);
 
     showNotification('✅ تم إضافة البطاقة بنجاح');
     openCards();
+    renderCards();
 }
 
 function blockCard(cardId) {
@@ -654,6 +778,7 @@ function blockCard(cardId) {
         DB.setCards(cards);
         showNotification('🔒 تم حظر البطاقة');
         openCards();
+        renderCards();
     }
 }
 
@@ -665,18 +790,23 @@ function unblockCard(cardId) {
         DB.setCards(cards);
         showNotification('🔓 تم إلغاء حظر البطاقة');
         openCards();
+        renderCards();
     }
 }
 
 function setDefaultCard(cardId) {
+    const user = DB.getCurrentUser();
+    if (!user) return;
+
     const cards = DB.getCards();
-    cards.forEach(c => c.isDefault = false);
+    cards.forEach(c => { if (c.userId === user.id) c.isDefault = false; });
     const card = cards.find(c => c.id === cardId);
     if (card) {
         card.isDefault = true;
         DB.setCards(cards);
         showNotification('⭐ تم تعيين البطاقة كبطاقة افتراضية');
         openCards();
+        renderCards();
     }
 }
 
@@ -754,6 +884,7 @@ document.getElementById('internationalForm').addEventListener('submit', function
     showNotification(`✅ تم تنفيذ الحوالة الدولية: ${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`);
     closeModal('internationalModal');
     updateDashboard();
+    renderCards();
 });
 
 // ============================================================
@@ -770,6 +901,12 @@ function openSupport() {
 document.getElementById('supportForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const user = DB.getCurrentUser();
+    if (!user) {
+        showNotification('يرجى تسجيل الدخول أولاً', 'error');
+        return;
+    }
+
     const message = document.getElementById('supportMessage').value.trim();
     if (!message) return;
 
@@ -779,6 +916,20 @@ document.getElementById('supportForm').addEventListener('submit', function(e) {
     `;
 
     document.getElementById('supportMessage').value = '';
+
+    // إرسال رسالة للأدمن
+    const messages = DB.getMessages();
+    messages.push({
+        id: Date.now(),
+        fromUserId: user.id,
+        fromUsername: user.username,
+        fromFullName: user.fullName,
+        message: message,
+        timestamp: new Date().toLocaleString('ar-SA'),
+        read: false,
+        isSupport: false
+    });
+    DB.setMessages(messages);
 
     // رد تلقائي
     setTimeout(() => {
@@ -793,10 +944,185 @@ document.getElementById('supportForm').addEventListener('submit', function(e) {
             <div class="chat-message support">🤖 ${reply}</div>
         `;
         container.scrollTop = container.scrollHeight;
+
+        // حفظ رد الدعم
+        const supportMessages = DB.getMessages();
+        supportMessages.push({
+            id: Date.now() + 1,
+            fromUserId: 0,
+            fromUsername: 'admin',
+            fromFullName: 'الدعم الفني',
+            message: reply,
+            timestamp: new Date().toLocaleString('ar-SA'),
+            read: true,
+            isSupport: true,
+            toUserId: user.id
+        });
+        DB.setMessages(supportMessages);
     }, 1000);
 
     container.scrollTop = container.scrollHeight;
 });
+
+// ============================================================
+//  نظام الرسائل (الشات)
+// ============================================================
+let chatCurrentUser = null;
+
+function openChat() {
+    const user = DB.getCurrentUser();
+    if (!user) {
+        showNotification('يرجى تسجيل الدخول أولاً', 'error');
+        return;
+    }
+
+    const messages = DB.getMessages();
+    const container = document.getElementById('chatUsersList');
+    const conversation = document.getElementById('chatConversation');
+
+    // إخفاء المحادثة وإظهار قائمة المستخدمين
+    conversation.style.display = 'none';
+    container.style.display = 'block';
+
+    if (user.isAdmin) {
+        // الأدمن يرى جميع المستخدمين الذين أرسلوا رسائل
+        const usersWithMessages = new Set();
+        messages.forEach(m => {
+            if (!m.isSupport) usersWithMessages.add(m.fromUserId);
+        });
+
+        if (usersWithMessages.size === 0) {
+            container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.3); padding:20px;">لا توجد رسائل</div>';
+        } else {
+            const users = DB.getUsers();
+            let html = '';
+            usersWithMessages.forEach(userId => {
+                const msgUser = users.find(u => u.id === userId);
+                if (msgUser) {
+                    const lastMsg = messages.filter(m => m.fromUserId === userId).pop();
+                    html += `
+                        <div class="chat-user-item" onclick="openChatWithUser(${userId})">
+                            <div>
+                                <div class="user-name">${msgUser.fullName}</div>
+                                <div class="user-last-msg">${lastMsg ? lastMsg.message.substring(0, 30) + '...' : ''}</div>
+                            </div>
+                            <div class="user-badge">${lastMsg && !lastMsg.read ? 'جديد' : ''}</div>
+                        </div>
+                    `;
+                }
+            });
+            container.innerHTML = html;
+        }
+    } else {
+        // المستخدم العادي يرى محادثته مع الدعم
+        const supportMessages = messages.filter(m => 
+            (m.fromUserId === user.id && m.isSupport) || 
+            (m.toUserId === user.id && m.isSupport)
+        );
+
+        if (supportMessages.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.3); padding:20px;">لا توجد رسائل مع الدعم</div>';
+        } else {
+            chatCurrentUser = 0; // الدعم الفني
+            container.style.display = 'none';
+            conversation.style.display = 'block';
+            renderChatMessages(user.id, 0);
+        }
+    }
+
+    openModal('chatModal');
+}
+
+function openChatWithUser(userId) {
+    chatCurrentUser = userId;
+    const container = document.getElementById('chatUsersList');
+    const conversation = document.getElementById('chatConversation');
+    
+    container.style.display = 'none';
+    conversation.style.display = 'block';
+    
+    const user = DB.getCurrentUser();
+    renderChatMessages(user.id, userId);
+}
+
+function renderChatMessages(currentUserId, otherUserId) {
+    const messages = DB.getMessages();
+    const container = document.getElementById('chatMessagesList');
+    
+    const relevantMessages = messages.filter(m => 
+        (m.fromUserId === currentUserId && m.toUserId === otherUserId) ||
+        (m.fromUserId === otherUserId && m.toUserId === currentUserId) ||
+        (m.fromUserId === currentUserId && m.isSupport && m.toUserId === otherUserId) ||
+        (m.fromUserId === otherUserId && m.isSupport && m.toUserId === currentUserId)
+    );
+
+    if (relevantMessages.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.3); padding:20px;">ابدأ المحادثة</div>';
+        return;
+    }
+
+    container.innerHTML = relevantMessages.map(m => {
+        const isSent = m.fromUserId === currentUserId;
+        return `
+            <div class="chat-msg ${isSent ? 'sent' : 'received'}">
+                ${m.message}
+                <span class="msg-time">${m.timestamp}</span>
+            </div>
+        `;
+    }).join('');
+
+    container.scrollTop = container.scrollHeight;
+
+    // تحديث الحالة مقروء
+    const updatedMessages = DB.getMessages();
+    updatedMessages.forEach(m => {
+        if (m.fromUserId === otherUserId && !m.read) {
+            m.read = true;
+        }
+    });
+    DB.setMessages(updatedMessages);
+}
+
+document.getElementById('chatSendForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const user = DB.getCurrentUser();
+    if (!user) {
+        showNotification('يرجى تسجيل الدخول أولاً', 'error');
+        return;
+    }
+
+    const message = document.getElementById('chatMessageInput').value.trim();
+    if (!message) return;
+
+    const messages = DB.getMessages();
+    messages.push({
+        id: Date.now(),
+        fromUserId: user.id,
+        fromUsername: user.username,
+        fromFullName: user.fullName,
+        toUserId: chatCurrentUser || 0,
+        message: message,
+        timestamp: new Date().toLocaleString('ar-SA'),
+        read: false,
+        isSupport: user.isAdmin ? true : false
+    });
+    DB.setMessages(messages);
+
+    document.getElementById('chatMessageInput').value = '';
+    renderChatMessages(user.id, chatCurrentUser || 0);
+
+    // تحديث الإشعارات
+    updateNotifications();
+});
+
+function closeChat() {
+    const container = document.getElementById('chatUsersList');
+    const conversation = document.getElementById('chatConversation');
+    container.style.display = 'block';
+    conversation.style.display = 'none';
+    chatCurrentUser = null;
+}
 
 // ============================================================
 //  الفروع
@@ -817,170 +1143,20 @@ function openBranches() {
 }
 
 // ============================================================
-//  الإعانات
+//  عرض الرصيد
 // ============================================================
-function openSubsidies() {
-    const subsidies = DB.getSubsidies();
-    const container = document.getElementById('subsidiesList');
-    
-    if (subsidies.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.3); padding:20px;">لا توجد إعانات حالياً</div>';
-    } else {
-        container.innerHTML = subsidies.map(s => `
-            <div class="subsidy-item">
-                <div class="subsidy-name">${s.name}</div>
-                <div class="subsidy-amount">${s.amount} ${s.currency}</div>
-                <div class="subsidy-status">الحالة: ${s.status}</div>
-            </div>
-        `).join('');
-    }
-
-    openModal('subsidiesModal');
-}
-
-function requestSubsidy() {
+function showBalance() {
     const user = DB.getCurrentUser();
     if (!user) {
         showNotification('يرجى تسجيل الدخول أولاً', 'error');
-        return;
-    }
-
-    const name = prompt('أدخل اسم الإعانة المطلوبة:');
-    if (!name) return;
-
-    const amount = parseFloat(prompt('أدخل قيمة الإعانة:'));
-    if (!amount || amount <= 0) {
-        showNotification('أدخل مبلغ صحيح', 'error');
-        return;
-    }
-
-    const subsidies = DB.getSubsidies();
-    subsidies.push({
-        id: Date.now(),
-        userId: user.id,
-        name: name,
-        amount: amount,
-        currency: 'SDG',
-        status: 'قيد المراجعة',
-        date: new Date().toLocaleString('ar-SA')
-    });
-    DB.setSubsidies(subsidies);
-
-    showNotification('✅ تم طلب الإعانة بنجاح، سيتم مراجعتها');
-    openSubsidies();
-}
-
-// ============================================================
-//  العروض
-// ============================================================
-function showOffers() {
-    const offers = DB.getOffers();
-    const container = document.getElementById('offersList');
-    
-    container.innerHTML = offers.map(o => `
-        <div class="offer-item">
-            <div class="offer-title">${o.title}</div>
-            <div class="offer-desc">${o.desc}</div>
-        </div>
-    `).join('');
-
-    openModal('offersModal');
-}
-
-// ============================================================
-//  خدمات القبول
-// ============================================================
-function openPayments() {
-    const amount = parseFloat(prompt('أدخل المبلغ المطلوب تحصيله:'));
-    if (!amount || amount <= 0) {
-        showNotification('أدخل مبلغ صحيح', 'error');
-        return;
-    }
-
-    const qrCode = `BANK_AL_YAD_PAYMENT_${Date.now()}_${amount}`;
-    showNotification(`✅ تم إنشاء رمز الدفع: ${qrCode}\nالمبلغ: ${amount.toFixed(2)} SDG`);
-}
-
-// ============================================================
-//  الإيداع والسحب السريع
-// ============================================================
-function quickDeposit() {
-    const user = DB.getCurrentUser();
-    if (!user) {
-        showNotification('يرجى تسجيل الدخول أولاً', 'error');
-        return;
-    }
-
-    const amount = parseFloat(prompt('أدخل مبلغ الإيداع:'));
-    if (!amount || amount <= 0) {
-        showNotification('أدخل مبلغ صحيح', 'error');
         return;
     }
 
     const accounts = DB.getAccounts();
     const account = accounts.find(a => a.userId === user.id);
-    if (!account) return;
-
-    account.balance += amount;
-    DB.setAccounts(accounts);
-
-    const transactions = DB.getTransactions();
-    transactions.push({
-        id: Date.now(),
-        fromAccount: 'SYSTEM',
-        toAccount: account.accountNumber,
-        amount: amount,
-        note: 'إيداع نقدي',
-        timestamp: new Date().toLocaleString('ar-SA'),
-        userId: user.id,
-        currency: account.currency || 'SDG'
-    });
-    DB.setTransactions(transactions);
-
-    showNotification(`💰 تم إيداع ${amount.toFixed(2)} ${account.currency || 'SDG'} بنجاح`);
-    updateDashboard();
-}
-
-function quickWithdraw() {
-    const user = DB.getCurrentUser();
-    if (!user) {
-        showNotification('يرجى تسجيل الدخول أولاً', 'error');
-        return;
+    if (account) {
+        showNotification(`💰 رصيدك الحالي: ${account.balance.toFixed(2)} ${account.currency || 'SDG'}`);
     }
-
-    const amount = parseFloat(prompt('أدخل مبلغ السحب:'));
-    if (!amount || amount <= 0) {
-        showNotification('أدخل مبلغ صحيح', 'error');
-        return;
-    }
-
-    const accounts = DB.getAccounts();
-    const account = accounts.find(a => a.userId === user.id);
-    if (!account) return;
-
-    if (account.balance < amount) {
-        showInsufficientNotification(account.balance, amount);
-        return;
-    }
-
-    account.balance -= amount;
-    DB.setAccounts(accounts);
-
-    const transactions = DB.getTransactions();
-    transactions.push({
-        id: Date.now(),
-        fromAccount: account.accountNumber,
-        toAccount: 'ATM_WITHDRAWAL',
-        amount: amount,
-        note: 'سحب نقدي',
-        timestamp: new Date().toLocaleString('ar-SA'),
-        userId: user.id,
-        currency: account.currency || 'SDG'
-    });
-    DB.setTransactions(transactions);
-
-    showNotification(`🏧 تم سحب ${amount.toFixed(2)} ${account.currency || 'SDG'} بنجاح`);
-    updateDashboard();
 }
 
 // ============================================================
@@ -1034,8 +1210,10 @@ function updateNotifications() {
     const user = DB.getCurrentUser();
     if (!user) return;
 
-    const notifications = DB.getNotifications();
-    const unread = notifications.filter(n => n.userId === user.id && !n.read);
+    const messages = DB.getMessages();
+    const unread = messages.filter(m => 
+        (m.toUserId === user.id || (user.isAdmin && !m.read)) && !m.read
+    );
     document.getElementById('notifCount').textContent = unread.length;
 }
 
@@ -1043,8 +1221,10 @@ function toggleNotifications() {
     const user = DB.getCurrentUser();
     if (!user) return;
 
-    const notifications = DB.getNotifications();
-    const userNotifs = notifications.filter(n => n.userId === user.id);
+    const messages = DB.getMessages();
+    const userNotifs = messages.filter(m => 
+        m.toUserId === user.id || (user.isAdmin && !m.read)
+    );
 
     if (userNotifs.length === 0) {
         showNotification('📬 لا توجد إشعارات');
@@ -1053,71 +1233,13 @@ function toggleNotifications() {
 
     let message = '📬 الإشعارات:\n';
     userNotifs.forEach(n => {
-        message += `• ${n.message}\n  (${n.timestamp})\n`;
+        const fromUser = DB.getUsers().find(u => u.id === n.fromUserId);
+        message += `• من ${fromUser ? fromUser.fullName : 'النظام'}: ${n.message}\n  (${n.timestamp})\n`;
         n.read = true;
     });
-    DB.setNotifications(notifications);
+    DB.setMessages(messages);
     updateNotifications();
     alert(message);
-}
-
-// ============================================================
-//  عرض الرصيد
-// ============================================================
-function showBalance() {
-    const user = DB.getCurrentUser();
-    if (!user) {
-        showNotification('يرجى تسجيل الدخول أولاً', 'error');
-        return;
-    }
-
-    const accounts = DB.getAccounts();
-    const account = accounts.find(a => a.userId === user.id);
-    if (account) {
-        showNotification(`💰 رصيدك الحالي: ${account.balance.toFixed(2)} ${account.currency || 'SDG'}`);
-    }
-}
-
-// ============================================================
-//  تأثير النقود المتطايرة
-// ============================================================
-function triggerFlyingMoney(event) {
-    const emojis = ['💵', '💰', '💸', '🪙', '💎', '💲', '🤑'];
-    const count = 20;
-
-    for (let i = 0; i < count; i++) {
-        const el = document.createElement('div');
-        el.className = 'flying-money';
-        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width;
-        const y = rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height;
-        
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
-        
-        const tx = (Math.random() - 0.5) * 500;
-        const ty = -Math.random() * 400 - 100;
-        el.style.setProperty('--tx', tx + 'px');
-        el.style.setProperty('--ty', ty + 'px');
-        
-        el.style.fontSize = (20 + Math.random() * 25) + 'px';
-        
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1200);
-    }
-}
-
-// ============================================================
-//  إدارة الحساب - عرض الرصيد الكامل
-// ============================================================
-function getTotalBalance() {
-    const user = DB.getCurrentUser();
-    if (!user) return '0.00 SDG';
-    const accounts = DB.getAccounts();
-    const account = accounts.find(a => a.userId === user.id);
-    return account ? formatCurrency(account.balance, account.currency || 'SDG') : '0.00 SDG';
 }
 
 // ============================================================
@@ -1138,11 +1260,15 @@ function renderAdminPanel() {
     const users = DB.getUsers();
     const accounts = DB.getAccounts();
     const transactions = DB.getTransactions();
+    const cards = DB.getCards();
+    const messages = DB.getMessages();
     const banned = DB.getBannedUsers();
 
     const totalUsers = users.filter(u => !u.isAdmin).length;
     const totalAccounts = accounts.length;
     const totalTransactions = transactions.length;
+    const totalCards = cards.length;
+    const unreadMessages = messages.filter(m => !m.read).length;
 
     let html = `
         <div class="admin-stats">
@@ -1158,10 +1284,19 @@ function renderAdminPanel() {
                 <div class="admin-stat-value">${totalTransactions}</div>
                 <div class="admin-stat-label">📊 المعاملات</div>
             </div>
+            <div class="admin-stat">
+                <div class="admin-stat-value">${totalCards}</div>
+                <div class="admin-stat-label">💳 البطاقات</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat-value">${unreadMessages}</div>
+                <div class="admin-stat-label">💬 رسائل غير مقروءة</div>
+            </div>
         </div>
         <div class="admin-actions">
             <button class="btn btn-primary" onclick="refreshAdminPanel()">🔄 تحديث</button>
-            <button class="btn btn-primary" onclick="exportData()">📤 تصدير البيانات</button>
+            <button class="btn btn-primary" onclick="openSendNotification()">📢 إرسال إشعار</button>
+            <button class="btn btn-success" onclick="exportData()">📤 تصدير</button>
             <button class="btn btn-danger" onclick="clearAllData()">🗑️ مسح الكل</button>
         </div>
         <table class="user-table">
@@ -1186,10 +1321,10 @@ function renderAdminPanel() {
 
         html += `
             <tr>
-                <td>${user.fullName}<br><small>@${user.username}</small></td>
+                <td>${user.fullName}<br><small style="opacity:0.4;">@${user.username}</small></td>
                 <td style="font-size:11px;">${account ? account.accountNumber : 'لا يوجد'}</td>
                 <td>${account ? formatCurrency(account.balance, account.currency || 'SDG') : '0.00 SDG'}</td>
-                <td style="font-size:12px;">${user.accountType || 'جاري'}</td>
+                <td style="font-size:11px;">${user.accountType || 'جاري'}</td>
                 <td><span class="status-badge ${statusClass}">${status}</span></td>
                 <td>
                     <div class="action-btns">
@@ -1199,7 +1334,9 @@ function renderAdminPanel() {
                         }
                         <button class="btn-delete" onclick="adminDeleteUser(${user.id})">🗑️</button>
                         <button class="btn-add" onclick="adminAddBalance(${user.id})">💰</button>
+                        <button class="btn-deduct" onclick="adminDeductBalance(${user.id})">➖</button>
                         <button class="btn-edit" onclick="adminEditUser(${user.id})">✏️</button>
+                        <button class="btn-info" onclick="adminViewMessages(${user.id})">💬</button>
                     </div>
                 </td>
             </tr>
@@ -1262,6 +1399,10 @@ function adminDeleteUser(userId) {
     cards = cards.filter(c => c.userId !== userId);
     DB.setCards(cards);
 
+    let messages = DB.getMessages();
+    messages = messages.filter(m => m.fromUserId !== userId && m.toUserId !== userId);
+    DB.setMessages(messages);
+
     let banned = DB.getBannedUsers();
     banned = banned.filter(u => u !== user.username);
     DB.setBannedUsers(banned);
@@ -1303,154 +1444,19 @@ function adminAddBalance(userId) {
     });
     DB.setTransactions(transactions);
 
+    // تحديث رصيد البطاقة
+    const cards = DB.getCards();
+    const defaultCard = cards.find(c => c.userId === userId && c.isDefault);
+    if (defaultCard) {
+        defaultCard.balance = account.balance;
+        DB.setCards(cards);
+    }
+
     showNotification(`💰 تم إضافة ${formatCurrency(numAmount, account.currency || 'SDG')} للمستخدم`);
     renderAdminPanel();
     updateDashboard();
+    renderCards();
 }
 
-function adminEditUser(userId) {
-    const users = DB.getUsers();
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    const newName = prompt('✏️ أدخل الاسم الجديد:', user.fullName);
-    if (newName && newName.trim()) {
-        user.fullName = newName.trim();
-        DB.setUsers(users);
-        showNotification('✅ تم تحديث الاسم');
-        renderAdminPanel();
-    }
-}
-
-function exportData() {
-    const data = {
-        users: DB.getUsers(),
-        accounts: DB.getAccounts(),
-        transactions: DB.getTransactions(),
-        cards: DB.getCards(),
-        branches: DB.getBranches(),
-        offers: DB.getOffers()
-    };
-
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bank_al_yad_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    showNotification('📤 تم تصدير البيانات بنجاح');
-}
-
-function clearAllData() {
-    if (!confirm('⚠️ تحذير: سيتم حذف جميع البيانات! هل أنت متأكد؟')) return;
-    if (!confirm('⛔ تأكيد نهائي: هل تريد حذف كل شيء؟')) return;
-
-    localStorage.clear();
-    showNotification('🗑️ تم مسح جميع البيانات');
-    setTimeout(() => {
-        location.reload();
-    }, 1500);
-}
-
-// ============================================================
-//  تسجيل الخروج
-// ============================================================
-function logout() {
-    DB.clearCurrentUser();
-    showLogin();
-}
-
-// ============================================================
-//  تهيئة التطبيق
-// ============================================================
-initAdminUser();
-initBranches();
-initOffers();
-
-const currentUser = DB.getCurrentUser();
-if (currentUser) {
-    const banned = DB.getBannedUsers();
-    if (banned.includes(currentUser.username)) {
-        showInsufficientNotification(0, 0, '😤', 'تم حظر حسابك من قبل الإدارة');
-        DB.clearCurrentUser();
-        showLogin();
-    } else {
-        showDashboard();
-    }
-} else {
-    showLogin();
-}
-
-// ============================================================
-//  بيانات تجريبية (اختياري)
-// ============================================================
-function seedDemoData() {
-    const users = DB.getUsers();
-    if (users.length === 1) {
-        const u1 = { id: 1001, fullName: 'أحمد محمد', username: 'ahmed', password: hashPassword('123456'), accountType: 'جاري', currency: 'SDG' };
-        const u2 = { id: 1002, fullName: 'سارة علي', username: 'sara', password: hashPassword('123456'), accountType: 'ادخار', currency: 'SDG' };
-        const u3 = { id: 1003, fullName: 'محمد خالد', username: 'mohammed', password: hashPassword('123456'), accountType: 'مرتب', currency: 'USD' };
-        users.push(u1, u2, u3);
-        DB.setUsers(users);
-
-        const accounts = DB.getAccounts();
-        accounts.push({ 
-            userId: u1.id, 
-            accountNumber: 'SA123456789012', 
-            cardNumber: '5246 7812 3456 7890',
-            cardExpiry: '06/25',
-            cvv: '123',
-            balance: 5000,
-            accountType: 'جاري',
-            currency: 'SDG',
-            isActive: true
-        });
-        accounts.push({ 
-            userId: u2.id, 
-            accountNumber: 'SA987654321098', 
-            cardNumber: '9876 5432 1098 7654',
-            cardExpiry: '09/26',
-            cvv: '456',
-            balance: 3000,
-            accountType: 'ادخار',
-            currency: 'SDG',
-            isActive: true
-        });
-        accounts.push({ 
-            userId: u3.id, 
-            accountNumber: 'SA555555555555', 
-            cardNumber: '1111 2222 3333 4444',
-            cardExpiry: '12/27',
-            cvv: '789',
-            balance: 1500,
-            accountType: 'مرتب',
-            currency: 'USD',
-            isActive: true
-        });
-        DB.setAccounts(accounts);
-
-        const txs = DB.getTransactions();
-        txs.push({
-            id: Date.now(),
-            fromAccount: 'SYSTEM',
-            toAccount: 'SA123456789012',
-            amount: 1000,
-            note: '🎁 مكافأة ترحيبية',
-            timestamp: new Date().toLocaleString('ar-SA'),
-            userId: u1.id,
-            currency: 'SDG'
-        });
-        DB.setTransactions(txs);
-
-        const cards = DB.getCards();
-        cards.push({ id: Date.now(), userId: u1.id, cardNumber: '5246 7812 3456 7890', cardType: 'فيزا كلاسيك', expiry: '06/25', status: 'نشط', isDefault: true });
-        cards.push({ id: Date.now() + 1, userId: u2.id, cardNumber: '9876 5432 1098 7654', cardType: 'فيزا ذهبية', expiry: '09/26', status: 'نشط', isDefault: true });
-        cards.push({ id: Date.now() + 2, userId: u3.id, cardNumber: '1111 2222 3333 4444', cardType: 'ماستركارد', expiry: '12/27', status: 'نشط', isDefault: true });
-        DB.setCards(cards);
-    }
-}
-// لإضافة بيانات تجريبية، قم بإلغاء تعليق السطر التالي:
-// seedDemoData();
+function adminDeductBalance(userId) {
+    cons
