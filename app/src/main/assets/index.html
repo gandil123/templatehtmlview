@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>قنديل بنك - الخدمات المصرفية المتكاملة </title>
+    <title>بنك الياد - الخدمات المصرفية المتكاملة</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -71,6 +71,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>نوع البطاقة</label>
+                        <select id="regCardType">
+                            <option value="كلاسيك">فيزا كلاسيك</option>
+                            <option value="عادية">فيزا عادية</option>
+                            <option value="ذهبية">فيزا ذهبية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>تأكيد كلمة المرور</label>
                         <input type="password" id="regConfirmPassword" placeholder="أعد كتابة كلمة المرور" required>
                     </div>
@@ -96,33 +104,12 @@
             <div class="total-balance">
                 <div class="label">إجمالي الرصيد</div>
                 <div class="amount" id="totalBalanceDisplay">0.00 <span class="currency">SDG</span></div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="btn-small" onclick="quickDeposit()">💰 إيداع</button>
-                    <button class="btn-small" onclick="quickWithdraw()">🏧 سحب</button>
-                </div>
             </div>
 
-            <!-- البطاقة الثلاثية الأبعاد -->
-            <div id="cardContainer" class="card-3d-container" style="display:none;" onclick="triggerFlyingMoney(event)">
-                <div class="card-3d" id="card3d">
-                    <div class="card-face">
-                        <div class="card-row">
-                            <span class="card-brand">✦ بنك الياد</span>
-                            <div class="chip"></div>
-                        </div>
-                        <div class="card-number" id="cardNumberDisplay">5246 7812 3456 7890</div>
-                        <div class="card-row">
-                            <div>
-                                <div style="font-size:10px; opacity:0.5;">حامل البطاقة</div>
-                                <div class="card-name" id="cardHolderName">خالد أسد</div>
-                            </div>
-                            <div>
-                                <div style="font-size:10px; opacity:0.5;">صالح حتى</div>
-                                <div class="card-expiry" id="cardExpiry">06/25</div>
-                            </div>
-                        </div>
-                        <div style="position:absolute; bottom:10px; left:20px; font-size:10px; opacity:0.3;">💳 للسحب الفوري</div>
-                    </div>
+            <!-- البطاقات (فيزا كلاسيك، عادية، ذهبية) -->
+            <div class="cards-scroll-container">
+                <div class="cards-scroll" id="cardsScroll">
+                    <!-- تُملأ بالجافاسكريبت -->
                 </div>
             </div>
 
@@ -134,24 +121,8 @@
                 <button class="quick-btn" onclick="openInternational()">🌍 حوالات</button>
             </div>
 
-            <!-- إحصائيات سريعة -->
-            <div class="stats-row">
-                <div class="stat-item">
-                    <span class="stat-label">عدد المعاملات</span>
-                    <span class="stat-value" id="txCount">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">أكبر إيداع</span>
-                    <span class="stat-value" id="maxDeposit">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">أكبر سحب</span>
-                    <span class="stat-value" id="maxWithdraw">0</span>
-                </div>
-            </div>
-
             <!-- سجل المعاملات -->
-            <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; margin:10px 0;">
+            <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; margin:5px 0;">
                 <div style="display:flex; justify-content:space-between; color:rgba(255,255,255,0.5); font-size:13px; padding:5px 0;">
                     <span>آخر المعاملات</span>
                     <span style="cursor:pointer;" onclick="showAllHistory()">عرض الكل</span>
@@ -162,7 +133,7 @@
             <!-- القائمة السفلية -->
             <div class="bottom-nav">
                 <button class="nav-item active" onclick="showDashboard()">🏠 الرئيسية</button>
-                <button class="nav-item" onclick="showOffers()">🎯 العروض</button>
+                <button class="nav-item" onclick="openChat()">💬 الرسائل</button>
                 <button class="nav-item" onclick="showBalance()">💰 المبلغ</button>
                 <button class="nav-item" onclick="showMorePage()">📋 المزيد</button>
             </div>
@@ -187,10 +158,6 @@
                     <span class="icon">🌍</span>
                     <span class="label">الحوالات الدولية</span>
                 </div>
-                <div class="more-item" onclick="openPayments()">
-                    <span class="icon">📋</span>
-                    <span class="label">خدمات القبول</span>
-                </div>
                 <div class="more-item" onclick="openSupport()">
                     <span class="icon">👤</span>
                     <span class="label">خدمة العملاء</span>
@@ -199,9 +166,9 @@
                     <span class="icon">📍</span>
                     <span class="label">الموقع والفروع</span>
                 </div>
-                <div class="more-item" onclick="openSubsidies()">
-                    <span class="icon">💵</span>
-                    <span class="label">إعانات الصرف</span>
+                <div class="more-item" onclick="openChat()">
+                    <span class="icon">💬</span>
+                    <span class="label">الرسائل</span>
                 </div>
                 <div class="more-item" onclick="openAdminPanel()" style="border-color:rgba(240,192,64,0.3);">
                     <span class="icon">👑</span>
@@ -214,7 +181,7 @@
             </div>
             <div class="bottom-nav" style="margin-top:auto;">
                 <button class="nav-item" onclick="showDashboard()">🏠 الرئيسية</button>
-                <button class="nav-item" onclick="showOffers()">🎯 العروض</button>
+                <button class="nav-item" onclick="openChat()">💬 الرسائل</button>
                 <button class="nav-item" onclick="showBalance()">💰 المبلغ</button>
                 <button class="nav-item active">📋 المزيد</button>
             </div>
@@ -336,22 +303,20 @@
             </div>
         </div>
 
-        <!-- ========== مودال الإعانات ========== -->
-        <div id="subsidiesModal" class="modal-overlay">
-            <div class="modal-content">
-                <h2>💵 إعانات الصرف</h2>
-                <div id="subsidiesList" class="subsidies-list"></div>
-                <button class="btn-modal" onclick="requestSubsidy()">طلب إعانة</button>
-                <button class="btn-close-modal" onclick="closeModal('subsidiesModal')">إغلاق</button>
-            </div>
-        </div>
-
-        <!-- ========== مودال العروض ========== -->
-        <div id="offersModal" class="modal-overlay">
-            <div class="modal-content">
-                <h2>🎯 العروض الحصرية</h2>
-                <div id="offersList" class="offers-list"></div>
-                <button class="btn-close-modal" onclick="closeModal('offersModal')">إغلاق</button>
+        <!-- ========== مودال الرسائل (الشات) ========== -->
+        <div id="chatModal" class="modal-overlay">
+            <div class="modal-content" style="max-width:500px;">
+                <h2>💬 الرسائل</h2>
+                <div id="chatUsersList" class="chat-users-list"></div>
+                <div id="chatConversation" style="display:none;">
+                    <div id="chatMessagesList" class="chat-messages-list" style="max-height:300px; overflow-y:auto;"></div>
+                    <form id="chatSendForm" style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="chatMessageInput" placeholder="اكتب رسالتك..." style="flex:1; padding:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white;">
+                        <button type="submit" style="padding:12px 20px; background:#f0c040; border:none; border-radius:12px; color:#0a0e1a; font-weight:700;">إرسال</button>
+                    </form>
+                    <button class="btn-close-modal" onclick="closeChat()" style="margin-top:10px;">رجوع</button>
+                </div>
+                <button class="btn-close-modal" onclick="closeModal('chatModal')">إغلاق</button>
             </div>
         </div>
 
@@ -361,6 +326,29 @@
                 <h2>👑 لوحة تحكم الإدارة</h2>
                 <div id="adminContent"></div>
                 <button class="btn-close-modal" onclick="closeModal('adminModal')">إغلاق</button>
+            </div>
+        </div>
+
+        <!-- ========== مودال إرسال إشعار للأعضاء ========== -->
+        <div id="sendNotificationModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>📢 إرسال إشعار</h2>
+                <div class="form-group">
+                    <label>المستلم</label>
+                    <select id="notifRecipient">
+                        <option value="all">جميع الأعضاء</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>عنوان الإشعار</label>
+                    <input type="text" id="notifTitle" placeholder="عنوان الإشعار">
+                </div>
+                <div class="form-group">
+                    <label>محتوى الإشعار</label>
+                    <textarea id="notifMessage" placeholder="اكتب محتوى الإشعار..." style="width:100%; padding:14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white; min-height:80px;"></textarea>
+                </div>
+                <button class="btn-modal" onclick="sendAdminNotification()">📨 إرسال الإشعار</button>
+                <button class="btn-close-modal" onclick="closeModal('sendNotificationModal')">إلغاء</button>
             </div>
         </div>
 
@@ -397,4 +385,4 @@
 
     <script src="script.js"></script>
 </body>
-    </html>
+                            </html>
